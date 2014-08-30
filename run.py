@@ -1,12 +1,17 @@
 #!/usr/bin/python
 
-from interface import *
-from threading import Thread
+from interface import Interface
 import time
+
+# Create an interface
 interface = Interface()
 
-thread=Thread(target=interface.start)
-thread.start()
+# Start the simulation
+interface.start()
 
+# ---TESTING CODE--- #
+# Wait three seconds, then change one of the squares to alive
 time.sleep(3)
 interface.grid[27][18]=True
+
+# -END TESTING CODE- #

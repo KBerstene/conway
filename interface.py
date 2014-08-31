@@ -40,11 +40,15 @@ class Interface():
 	# What runs in the asynchronous thread
 	def run(self):
 		while True:
+			click_pos=(-1,-1)
 			# Get pygame events to see if exit is called
 			for event in pygame.event.get():
 				if event.type == QUIT:
 					pygame.quit()
 					exit()
+				elif event.type == MOUSEBUTTONDOWN:
+					if event.button == 1:
+						click_pos=pygame.mouse.get_pos()
 
 			# Set background as white
 			self.window.fill(Color("white"))
@@ -52,6 +56,8 @@ class Interface():
 			# Iterate through grid and print white square as dead and black square as alive
 			for row in self.grid:
 				for cell in row:
+					if cell.collidepoint(click_pos):
+						cell.setStatus(not(cell.getStatus()))
 					pygame.draw.rect(self.window, Color("black"), cell, not(cell.getStatus()))
 
 
@@ -78,3 +84,5 @@ class Cell(pygame.Rect):
 	def setCoords(self, (x, y)):
 		self.coords=(x, y)
 
+	def collidePoint(self, (x, y)):
+		return super(Cell, self).collidePoint((x, y))

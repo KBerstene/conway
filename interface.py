@@ -17,21 +17,23 @@ class Interface():
 		self.fpsClock = pygame.time.Clock()
 
 		# Create a 40x30 array of cells
-		self.grid=[[Cell((0, 0), (21, 21)) for x in xrange(30)] for x in xrange(40)]
+		self.grid=[[Cell() for x in xrange(30)] for x in xrange(40)]
 
 		# Set each square's location
 		i = 0
 		while i < 40:
 			j = 0
 			while j < 30:
-				self.grid[i][j].left=i*20
-				self.grid[i][j].top=j*20
-				self.grid[i][j].coords=(i, j)
+				self.grid[i][j]=Cell((i*20, j*20))
 				j += 1
 			i += 1
 
 		# Get multithreading ready
 		self.thread=Thread(target=self.run)
+
+		# ---DEBUGGING TOOLS---
+		self.fpsDisplay=False
+
 
 	# Start the seperate thread
 	def start(self):
@@ -49,6 +51,9 @@ class Interface():
 				elif event.type == MOUSEBUTTONDOWN:
 					if event.button == 1:
 						click_pos=pygame.mouse.get_pos()
+				elif event.type == KEYDOWN:
+					if event.key == K_F3:
+						self.fpsDisplay=not(self.fpsDisplay)
 
 			# Set background as white
 			self.window.fill(Color("white"))
@@ -60,29 +65,27 @@ class Interface():
 						cell.setStatus(not(cell.getStatus()))
 					pygame.draw.rect(self.window, Color("black"), cell, not(cell.getStatus()))
 
+			# ---DEBUGGING---
+			# Display FPS on screen
+			if self.fpsDisplay:
+				self.window.blit(pygame.font.Font(None, 36).render("FPS: " + str(int(self.fpsClock.get_fps())), 1, Color("black"), Color("white")), (20,20))
 
 			# Draw the window and tick the clock
 			pygame.display.update()
 			self.fpsClock.tick(30)
 
 
+# Subclass of Rect to add alive/dead status
 class Cell(pygame.Rect):
-	def __init__(self, (left, top), (width, height)):
+	# Constructor
+	def __init__(self, (left, top)=(0, 0), (width, height)=(21, 21)):
 		super(Cell, self).__init__((left, top), (width, height))
 		self.alive=False
-		self.coords=(0, 0)
 
+	# Getters/Setters
 	def getStatus(self):
 		return self.alive
 
 	def setStatus(self, alive):
 		self.alive = alive
 
-	def getCoords(self):
-		return self.coords
-
-	def setCoords(self, (x, y)):
-		self.coords=(x, y)
-
-	def collidePoint(self, (x, y)):
-		return super(Cell, self).collidePoint((x, y))

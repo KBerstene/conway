@@ -12,6 +12,6 @@ interface.start()
 # ---TESTING CODE--- #
 # Wait three seconds, then change one of the squares to alive
 time.sleep(3)
-interface.grid[27][18]=True
+interface.grid[27][18].setStatus(True)
 
 # -END TESTING CODE- #

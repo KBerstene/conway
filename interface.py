@@ -18,16 +18,15 @@ class Interface():
 		self.simRunning=False
 
 		# Create a 40x30 array of cells
-		self.grid=[[Cell() for x in xrange(30)] for x in xrange(40)]
+		self.grid_width = 40
+		self.grid_height = 30
+
+		self.grid=[[Cell() for x in xrange(self.grid_height)] for x in xrange(self.grid_width)]
 
 		# Set each square's location
-		i = 0
-		while i < 40:
-			j = 0
-			while j < 30:
-				self.grid[i][j]=Cell((i*20, j*20))
-				j += 1
-			i += 1
+		for i in xrange(self.grid_width):
+			for j in xrange(self.grid_height):
+				self.grid[i][j] = Cell((i*20, j*20))
 
 		# Create interface control buttons
 		self.startButton=pygame.Rect((840, 60), (120,41))

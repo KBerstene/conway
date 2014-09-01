@@ -3,15 +3,7 @@
 from interface import Interface
 import time
 
-# Create an interface
+# Initialize and launch the interface
 interface = Interface()
+interface.launch()
 
-# Start the simulation
-interface.start()
-
-# ---TESTING CODE--- #
-# Wait three seconds, then change one of the squares to alive
-time.sleep(3)
-interface.grid[27][18].setStatus(True)
-
-# -END TESTING CODE- #

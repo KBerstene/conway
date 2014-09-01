@@ -42,7 +42,7 @@ class Interface():
 
 
 	# Start the seperate thread
-	def start(self):
+	def launch(self):
 		self.thread.start()
 
 	# What runs in the asynchronous thread
@@ -85,8 +85,7 @@ class Interface():
 
 			# Run the calculations
 			if self.simRunning:
-				# Jon, call something from another file here
-				pass
+				calc_status(self.grid)
 
 			# Iterate through grid and print white square as dead and black square as alive
 			for row in self.grid:

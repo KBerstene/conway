@@ -12,9 +12,10 @@ class Interface():
 		# Initialize pygame, create a window,
 		# and create clock to limit FPS
 		pygame.init()
-		self.window = pygame.display.set_mode((801,601))
+		self.window = pygame.display.set_mode((1001,601))
 		pygame.display.set_caption("Conway's Game of Life")
 		self.fpsClock = pygame.time.Clock()
+		self.simRunning=False
 
 		# Create a 40x30 array of cells
 		self.grid=[[Cell() for x in xrange(30)] for x in xrange(40)]
@@ -27,6 +28,12 @@ class Interface():
 				self.grid[i][j]=Cell((i*20, j*20))
 				j += 1
 			i += 1
+
+		# Create interface control buttons
+		self.startButton=pygame.Rect((840, 60), (120,41))
+		self.startButtonText=pygame.font.Font(None, 20).render("Start Simulation", 1, Color("black"))
+		self.resetButton=pygame.Rect((840, 140), (120,41))
+		self.resetButtonText=pygame.font.Font(None, 20).render("Reset Simulation", 1, Color("black"))
 
 		# Get multithreading ready
 		self.thread=Thread(target=self.run)
@@ -50,13 +57,37 @@ class Interface():
 					exit()
 				elif event.type == MOUSEBUTTONDOWN:
 					if event.button == 1:
-						click_pos=pygame.mouse.get_pos()
+						if self.startButton.collidepoint(pygame.mouse.get_pos()):
+							if self.simRunning:
+								self.simRunning=False
+								self.startButtonText=pygame.font.Font(None, 20).render("Start Simulation", 1, Color("black"))
+							else:
+								self.simRunning=True
+								self.startButtonText=pygame.font.Font(None, 20).render("Pause Simulation", 1, Color("black"))
+						elif self.resetButton.collidepoint(pygame.mouse.get_pos()):
+							self.__init__()
+						else:
+							click_pos=pygame.mouse.get_pos()
 				elif event.type == KEYDOWN:
 					if event.key == K_F3:
 						self.fpsDisplay=not(self.fpsDisplay)
 
 			# Set background as white
 			self.window.fill(Color("white"))
+
+			# Draw control buttons
+			pygame.draw.rect(self.window, Color("black"), self.startButton, 1)
+			if self.simRunning:
+				self.window.blit(self.startButtonText, (845, 74))
+			else:
+				self.window.blit(self.startButtonText, (850, 74))
+			pygame.draw.rect(self.window, Color("black"), self.resetButton, 1)
+			self.window.blit(self.resetButtonText, (846, 154))
+
+			# Run the calculations
+			if self.simRunning:
+				# Jon, call something from another file here
+				pass
 
 			# Iterate through grid and print white square as dead and black square as alive
 			for row in self.grid:

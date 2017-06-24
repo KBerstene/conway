@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import pygame
+from algorithms import *
 from pygame.locals import *
 from pygame import Color
 from threading import Thread

@@ -4,7 +4,11 @@ import pygame
 from pygame.locals import *
 from pygame import Color
 from threading import Thread
+from collections import namedtuple
 
+Position = namedtuple('Position','left top')
+Coordinates = namedtuple('Coordinates','x y')
+Dimensions = namedtuple('Dimensions','width height')
 
 class Interface():
 	# Constructor
@@ -22,12 +26,12 @@ class Interface():
 		self.grid_width = 40
 		self.grid_height = 30
 
-		self.grid=[[Cell() for x in xrange(self.grid_height)] for x in xrange(self.grid_width)]
+		self.grid=[[Cell() for x in range(self.grid_height)] for x in range(self.grid_width)]
 
-		# Set each square's location
-		for i in xrange(self.grid_width):
-			for j in xrange(self.grid_height):
-				self.grid[i][j] = Cell((i*20, j*20))
+		# Set each square's position
+		for i in range(self.grid_width):
+			for j in range(self.grid_height):
+				self.grid[i][j] = Cell(Position(i*20, j*20))
 
 		# Create interface control buttons
 		self.startButton=pygame.Rect((840, 60), (120,41))
@@ -36,8 +40,8 @@ class Interface():
 		self.resetButtonText=pygame.font.Font(None, 20).render("Reset Simulation", 1, Color("black"))
 		self.speedText=pygame.font.Font(None, 20).render("Simulation Speed", 1, Color("black"))
 		self.speedDisplayBox=pygame.Rect((870,230), (61, 31))
-		self.speedUpButton=TriButton((959,245),(935,230),(935,260))
-		self.speedDownButton=TriButton((840,245),(865,230),(865,260))
+		self.speedUpButton=TriButton(Coordinates(959,245),Coordinates(935,230),Coordinates(935,260))
+		self.speedDownButton=TriButton(Coordinates(840,245),Coordinates(865,230),Coordinates(865,260))
 
 		# Get multithreading ready
 		self.thread=Thread(target=self.run)
@@ -45,12 +49,13 @@ class Interface():
 
 	# Start the seperate thread
 	def launch(self):
-		self.thread.start()
+		self.run()
 
 	# What runs in the asynchronous thread
 	def run(self):
 		while True:
 			click_pos=(-1,-1)
+
 			# Get pygame events to see if exit is called
 			for event in pygame.event.get():
 				if event.type == QUIT:
@@ -77,7 +82,9 @@ class Interface():
 							click_pos=pygame.mouse.get_pos()
 				elif event.type == KEYDOWN:
 					pass
-
+				else:
+					pass
+			
 			# Set background as white
 			self.window.fill(Color("white"))
 
@@ -112,13 +119,15 @@ class Interface():
 			# Draw the window and tick the clock
 			pygame.display.update()
 			self.fpsClock.tick(self.fpsLimit)
+			
+			
 
 
 # Subclass of Rect to add alive/dead status
 class Cell(pygame.Rect):
 	# Constructor
-	def __init__(self, (left, top)=(0, 0), (width, height)=(21, 21)):
-		super(Cell, self).__init__((left, top), (width, height))
+	def __init__(self, pos=Position(0, 0), size=Dimensions(21, 21)):
+		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
 		self.alive=False
 
 	# Getters/Setters
@@ -127,19 +136,20 @@ class Cell(pygame.Rect):
 
 	def setStatus(self, alive):
 		self.alive = alive
-
-
+		
 # Triangle Buttons
 class TriButton():
 	# Constructor
-	def __init__(self, (x1, y1), (x2, y2), (x3, y3)):
-		self.x = (x1, x2, x3)
-		self.y = (y1, y2, y3)
+	def __init__(self, coords1, coords2, coords3):
+		self.x = (coords1.x, coords2.x, coords3.x)
+		self.y = (coords1.y, coords2.y, coords3.y)
 
 	def getPoints(self):
 		return ((self.x[0], self.y[0]), (self.x[1], self.y[1]), (self.x[2], self.y[2]))
 
-	def collidepoint(self, (mouse_x, mouse_y)):
+	def collidepoint(self, mouse_pos):
+		mouse_x = mouse_pos[0]
+		mouse_y = mouse_pos[1]
 		if mouse_x < min(self.x) or mouse_x > max(self.x):
 			return False
 		if mouse_y < min(self.y) or mouse_y > max(self.y):

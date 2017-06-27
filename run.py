@@ -5,4 +5,7 @@ import time
 
 # Initialize and launch the interface
 interface = Interface()
-interface.update()
+
+while (True):
+	interface.update()
+	interface.fpsClock.tick(interface.fpsLimit)

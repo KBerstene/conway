@@ -19,7 +19,7 @@ class Interface():
 		self.window = pygame.display.set_mode((1001,601))
 		pygame.display.set_caption("Conway's Game of Life")
 		self.fpsClock = pygame.time.Clock()
-		self.fpsLimit = 2
+		self.fpsLimit = 60
 		self.simRunning=False
 
 		# Create a 40x30 array of cells
@@ -44,22 +44,17 @@ class Interface():
 		self.speedDownButton=TriButton(Coordinates(840,245),Coordinates(865,230),Coordinates(865,260))
 
 	def update(self):
-		while True:
-			print("cycle")
-			
-			# Process any mouse/keyboard events
-			if not self.processEvents():
-				return
+		print("cycle")
+		
+		# Process any mouse/keyboard events
+		if not self.processEvents():
+			return
 
-			# Draw objects
-			self.draw()
+		# Draw objects
+		self.draw()
 
-			# Update window
-			pygame.display.update()
-			
-			# Tick the clock
-			self.fpsClock.tick(self.fpsLimit)
-			
+		# Update window
+		pygame.display.update()
 		
 	def processEvents(self):
 		click_pos=(-1,-1)

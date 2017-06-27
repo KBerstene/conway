@@ -4,7 +4,6 @@ import pygame
 from algorithms import *
 from pygame.locals import *
 from pygame import Color
-from threading import Thread
 from collections import namedtuple
 
 Position = namedtuple('Position','left top')
@@ -36,92 +35,108 @@ class Interface():
 
 		# Create interface control buttons
 		self.startButton=pygame.Rect((840, 60), (120,41))
-		self.startButtonText=pygame.font.Font(None, 20).render("Start Simulation", 1, Color("black"))
+		self.startButtonText=pygame.font.Font(None, 20).render("Start", 1, Color("black"))
 		self.resetButton=pygame.Rect((840, 140), (120,41))
-		self.resetButtonText=pygame.font.Font(None, 20).render("Reset Simulation", 1, Color("black"))
-		self.speedText=pygame.font.Font(None, 20).render("Simulation Speed", 1, Color("black"))
+		self.resetButtonText=pygame.font.Font(None, 20).render("Reset", 1, Color("black"))
+		self.speedText=pygame.font.Font(None, 20).render("Speed", 1, Color("black"))
 		self.speedDisplayBox=pygame.Rect((870,230), (61, 31))
 		self.speedUpButton=TriButton(Coordinates(959,245),Coordinates(935,230),Coordinates(935,260))
 		self.speedDownButton=TriButton(Coordinates(840,245),Coordinates(865,230),Coordinates(865,260))
 
-		# Get multithreading ready
-		self.thread=Thread(target=self.run)
-
-
-	# Start the seperate thread
-	def launch(self):
-		self.run()
-
-	# What runs in the asynchronous thread
-	def run(self):
+	def update(self):
 		while True:
-			click_pos=(-1,-1)
-
-			# Get pygame events to see if exit is called
-			for event in pygame.event.get():
-				if event.type == QUIT:
-					pygame.quit()
-					exit()
-				elif event.type == MOUSEBUTTONDOWN:
-					if event.button == 1:
-						if self.startButton.collidepoint(pygame.mouse.get_pos()):
-							if self.simRunning:
-								self.simRunning=False
-								self.startButtonText=pygame.font.Font(None, 20).render("Start Simulation", 1, Color("black"))
-							else:
-								self.simRunning=True
-								self.startButtonText=pygame.font.Font(None, 20).render("Pause Simulation", 1, Color("black"))
-						elif self.resetButton.collidepoint(pygame.mouse.get_pos()):
-							self.__init__()
-						elif self.speedUpButton.collidepoint(pygame.mouse.get_pos()):
-							if (self.fpsLimit < 9):
-								self.fpsLimit+=1
-						elif self.speedDownButton.collidepoint(pygame.mouse.get_pos()):
-							if (self.fpsLimit > 1):
-								self.fpsLimit-=1
-						else:
-							click_pos=pygame.mouse.get_pos()
-				elif event.type == KEYDOWN:
-					pass
-				else:
-					pass
+			print("cycle")
 			
-			# Set background as white
-			self.window.fill(Color("white"))
+			# Process any mouse/keyboard events
+			if not self.processEvents():
+				return
 
-			# Draw control buttons
-				# Start/Pause Button
-			pygame.draw.rect(self.window, Color("black"), self.startButton, 1)
-			if self.simRunning:
-				self.window.blit(self.startButtonText, (845, 74))
-			else:
-				self.window.blit(self.startButtonText, (850, 74))
-				# Reset Button
-			pygame.draw.rect(self.window, Color("black"), self.resetButton, 1)
-			self.window.blit(self.resetButtonText, (846, 154))
-				# Speed Up/Down Display
-			self.window.blit(self.speedText, (844, 210))
-			pygame.draw.rect(self.window, Color("black"), self.speedDisplayBox, 1)
-			pygame.draw.polygon(self.window, Color("black"), self.speedUpButton.getPoints(), 1)
-			pygame.draw.polygon(self.window, Color("black"), self.speedDownButton.getPoints(), 1)
-			self.window.blit(pygame.font.Font(None, 30).render(str(self.fpsLimit), 1, Color("black")), (894,234))
+			# Draw objects
+			self.draw()
 
-			# Run the calculations
-			if self.simRunning:
-				calc_status(self.grid)
-
-			# Iterate through grid and print white square as dead and black square as alive
-			for row in self.grid:
-				for cell in row:
-					if cell.collidepoint(click_pos):
-						cell.setStatus(not(cell.getStatus()))
-					pygame.draw.rect(self.window, Color("black"), cell, not(cell.getStatus()))
-
-			# Draw the window and tick the clock
+			# Update window
 			pygame.display.update()
+			
+			# Tick the clock
 			self.fpsClock.tick(self.fpsLimit)
 			
-			
+		
+	def processEvents(self):
+		click_pos=(-1,-1)
+
+		# Get pygame events to see if exit is called
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				return False
+			elif event.type == MOUSEBUTTONDOWN:
+				if event.button == 1:
+					if self.startButton.collidepoint(pygame.mouse.get_pos()):
+						if self.simRunning:
+							self.simRunning=False
+							self.startButtonText=pygame.font.Font(None, 20).render("Start", 1, Color("black"))
+						else:
+							self.simRunning=True
+							self.startButtonText=pygame.font.Font(None, 20).render("Pause", 1, Color("black"))
+					elif self.resetButton.collidepoint(pygame.mouse.get_pos()):
+						self.__init__()
+					elif self.speedUpButton.collidepoint(pygame.mouse.get_pos()):
+						if (self.fpsLimit < 9):
+							self.fpsLimit+=1
+					elif self.speedDownButton.collidepoint(pygame.mouse.get_pos()):
+						if (self.fpsLimit > 1):
+							self.fpsLimit-=1
+					else:
+						click_pos=pygame.mouse.get_pos()
+			elif event.type == KEYDOWN:
+				print("keypress")
+				pass
+			else:
+				print("event")
+				pass
+		
+		self.scanRows(click_pos)
+		
+		return True
+		
+	def scanRows(self, click_pos):
+		for row in self.grid:
+			for cell in row:
+				if cell.collidepoint(click_pos):
+					cell.setStatus(not(cell.getStatus()))
+					return True
+		return False
+	
+	
+	def draw(self):
+		# Set background as white
+		self.window.fill(Color("white"))
+
+		# Draw control buttons
+			# Start/Pause Button
+		pygame.draw.rect(self.window, Color("black"), self.startButton, 1)
+		if self.simRunning:
+			self.window.blit(self.startButtonText, (845, 74))
+		else:
+			self.window.blit(self.startButtonText, (850, 74))
+			# Reset Button
+		pygame.draw.rect(self.window, Color("black"), self.resetButton, 1)
+		self.window.blit(self.resetButtonText, (846, 154))
+			# Speed Up/Down Display
+		self.window.blit(self.speedText, (844, 210))
+		pygame.draw.rect(self.window, Color("black"), self.speedDisplayBox, 1)
+		pygame.draw.polygon(self.window, Color("black"), self.speedUpButton.getPoints(), 1)
+		pygame.draw.polygon(self.window, Color("black"), self.speedDownButton.getPoints(), 1)
+		self.window.blit(pygame.font.Font(None, 30).render(str(self.fpsLimit), 1, Color("black")), (894,234))
+
+		# Run the calculations
+		if self.simRunning:
+			calc_status(self.grid)
+
+		# Iterate through grid and print white square as dead and black square as alive
+		for row in self.grid:
+			for cell in row:
+				pygame.draw.rect(self.window, Color("black"), cell, not(cell.getStatus()))
 
 
 # Subclass of Rect to add alive/dead status

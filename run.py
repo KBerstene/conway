@@ -5,5 +5,4 @@ import time
 
 # Initialize and launch the interface
 interface = Interface()
-interface.launch()
-
+interface.update()

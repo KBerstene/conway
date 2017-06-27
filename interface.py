@@ -56,6 +56,10 @@ class Interface():
 		# Update window
 		pygame.display.update()
 		
+		# Limit FPS
+		self.fpsClock.tick(self.fpsLimit)
+
+		
 	def processEvents(self):
 		click_pos=(-1,-1)
 

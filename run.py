@@ -1,11 +1,18 @@
 #!/usr/bin/python
 
 from interface import Interface
-import time
+from threads import *
 
-# Initialize and launch the interface
-interface = Interface()
+if __name__ == "__main__":
+	# Initialize the interface
+	interface = Interface()
 
-while (True):
-	interface.update()
-	interface.fpsClock.tick(interface.fpsLimit)
+	# Initialize the calculations thread
+	calculations = CalcThread(interface)
+
+	# Start the calc thread
+	calculations.start()
+	
+	# Run the interface updates
+	while (True):
+		interface.update()

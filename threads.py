@@ -10,9 +10,10 @@ class CalcThread(Thread):
 		Thread.__init__(self)
 		self.daemon = True
 		self.interface = interface
+		self.speed = 2
 		
 	def run(self):
 		while (True):
 			if self.interface.simRunning:
-				print("calculate")
-				sleep(1)
+				calc_status(self.interface.grid)
+				sleep(1.0/self.speed)

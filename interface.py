@@ -12,7 +12,7 @@ Dimensions = namedtuple('Dimensions','width height')
 
 class Interface():
 	# Constructor
-	def __init__(self):
+	def __init__(self, calcThread=None):
 		# Initialize pygame, create a window,
 		# and create clock to limit FPS
 		pygame.init()
@@ -21,6 +21,7 @@ class Interface():
 		self.fpsClock = pygame.time.Clock()
 		self.fpsLimit = 60
 		self.simRunning=False
+		self.calcThread = calcThread
 
 		# Create a 40x30 array of cells
 		self.grid_width = 40
@@ -44,11 +45,9 @@ class Interface():
 		self.speedDownButton=TriButton(Coordinates(840,245),Coordinates(865,230),Coordinates(865,260))
 
 	def update(self):
-		print("cycle")
-		
 		# Process any mouse/keyboard events
 		if not self.processEvents():
-			return
+			return False
 
 		# Draw objects
 		self.draw()
@@ -59,6 +58,7 @@ class Interface():
 		# Limit FPS
 		self.fpsClock.tick(self.fpsLimit)
 
+		return True
 		
 	def processEvents(self):
 		click_pos=(-1,-1)
@@ -78,20 +78,18 @@ class Interface():
 							self.simRunning=True
 							self.startButtonText=pygame.font.Font(None, 20).render("Pause", 1, Color("black"))
 					elif self.resetButton.collidepoint(pygame.mouse.get_pos()):
-						self.__init__()
+						self.__init__(self.calcThread)
 					elif self.speedUpButton.collidepoint(pygame.mouse.get_pos()):
-						if (self.fpsLimit < 9):
-							self.fpsLimit+=1
+						if (self.calcThread.speed < 9):
+							self.calcThread.speed +=1
 					elif self.speedDownButton.collidepoint(pygame.mouse.get_pos()):
-						if (self.fpsLimit > 1):
-							self.fpsLimit-=1
+						if (self.calcThread.speed > 1):
+							self.calcThread.speed -=1
 					else:
 						click_pos=pygame.mouse.get_pos()
 			elif event.type == KEYDOWN:
-				print("keypress")
 				pass
 			else:
-				print("event")
 				pass
 		
 		self.scanRows(click_pos)
@@ -126,7 +124,7 @@ class Interface():
 		pygame.draw.rect(self.window, Color("black"), self.speedDisplayBox, 1)
 		pygame.draw.polygon(self.window, Color("black"), self.speedUpButton.getPoints(), 1)
 		pygame.draw.polygon(self.window, Color("black"), self.speedDownButton.getPoints(), 1)
-		self.window.blit(pygame.font.Font(None, 30).render(str(self.fpsLimit), 1, Color("black")), (894,234))
+		self.window.blit(pygame.font.Font(None, 30).render(str(self.calcThread.speed), 1, Color("black")), (894,234))
 
 		# Run the calculations
 		if self.simRunning:

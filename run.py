@@ -9,10 +9,15 @@ if __name__ == "__main__":
 
 	# Initialize the calculations thread
 	calculations = CalcThread(interface)
+	
+	# Let interface know about calc thread so it can display speed
+	interface.calcThread = calculations
 
 	# Start the calc thread
 	calculations.start()
 	
 	# Run the interface updates
-	while (True):
-		interface.update()
+	while (interface.update()):
+		pass
+		
+	exit()

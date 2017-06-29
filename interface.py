@@ -13,20 +13,24 @@ Dimensions = namedtuple('Dimensions','width height')
 class Interface():
 	# Constructor
 	def __init__(self, calcThread=None):
-		# Initialize pygame, create a window,
-		# and create clock to limit FPS
+		# Declare constants
+			# General
+		self.fpsLimit = 60
+		self.simRunning = False
+		self.calcThread = calcThread
+			# Grid
+		self.grid_width = 40
+		self.grid_height = 30
+		
+		# Initialize pygame window
 		pygame.init()
 		self.window = pygame.display.set_mode((1001,601))
 		pygame.display.set_caption("Conway's Game of Life")
+		
+		# Create clock to limit FPS
 		self.fpsClock = pygame.time.Clock()
-		self.fpsLimit = 60
-		self.simRunning=False
-		self.calcThread = calcThread
 
-		# Create a 40x30 array of cells
-		self.grid_width = 40
-		self.grid_height = 30
-
+		# Create a array of cells
 		self.grid=[[Cell() for x in range(self.grid_height)] for x in range(self.grid_width)]
 
 		# Set each square's position

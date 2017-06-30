@@ -18,6 +18,7 @@ class Interface():
 		self.fpsLimit = 60
 		self.simRunning = False
 		self.calcThread = calcThread
+		self.fontPath = "res/trebuc.ttf"
 			# Grid
 		self.grid_width = 40
 		self.grid_height = 30
@@ -39,15 +40,17 @@ class Interface():
 				self.grid[i][j] = Cell(Position(i*20, j*20))
 
 		# Create interface control buttons
-		self.startButton=pygame.Rect((840, 60), (120,41))
-		self.startButtonText=pygame.font.Font(None, 20).render("Start", 1, Color("black"))
-		self.resetButton=pygame.Rect((840, 140), (120,41))
-		self.resetButtonText=pygame.font.Font(None, 20).render("Reset", 1, Color("black"))
-		self.speedText=pygame.font.Font(None, 20).render("Speed", 1, Color("black"))
-		self.speedDisplayBox=pygame.Rect((870,230), (61, 31))
+		self.startButton = RectWithText(Position(840, 60), Dimensions(120,41), "Start", self.fontPath)
+		self.resetButton = RectWithText(Position(840, 140), Dimensions(120,41), "Reset", self.fontPath)
+		self.speedText=pygame.font.Font(self.fontPath, 20).render("Speed", 1, Color("black"))
+		self.speedDisplayBox = RectWithText(Position(870,230), Dimensions(61, 31), "2", self.fontPath)
 		self.speedUpButton=TriButton(Coordinates(959,245),Coordinates(935,230),Coordinates(935,260))
 		self.speedDownButton=TriButton(Coordinates(840,245),Coordinates(865,230),Coordinates(865,260))
-
+		
+	def setCalcThread(self,calcThread):
+		self.calcThread = calcThread
+		self.speedDisplayBox.setText(str(self.calcThread.speed))
+		
 	def update(self):
 		# Process any mouse/keyboard events
 		if not self.processEvents():
@@ -77,18 +80,20 @@ class Interface():
 					if self.startButton.collidepoint(pygame.mouse.get_pos()):
 						if self.simRunning:
 							self.simRunning=False
-							self.startButtonText=pygame.font.Font(None, 20).render("Start", 1, Color("black"))
+							self.startButton.setText("Start")
 						else:
 							self.simRunning=True
-							self.startButtonText=pygame.font.Font(None, 20).render("Pause", 1, Color("black"))
+							self.startButton.setText("Pause")
 					elif self.resetButton.collidepoint(pygame.mouse.get_pos()):
 						self.__init__(self.calcThread)
 					elif self.speedUpButton.collidepoint(pygame.mouse.get_pos()):
 						if (self.calcThread.speed < 9):
 							self.calcThread.speed +=1
+							self.speedDisplayBox.setText(str(self.calcThread.speed))
 					elif self.speedDownButton.collidepoint(pygame.mouse.get_pos()):
 						if (self.calcThread.speed > 1):
 							self.calcThread.speed -=1
+							self.speedDisplayBox.setText(str(self.calcThread.speed))
 					else:
 						click_pos=pygame.mouse.get_pos()
 			elif event.type == KEYDOWN:
@@ -115,21 +120,17 @@ class Interface():
 
 		# Draw control buttons
 			# Start/Pause Button
-		pygame.draw.rect(self.window, Color("black"), self.startButton, 1)
-		if self.simRunning:
-			self.window.blit(self.startButtonText, (845, 74))
-		else:
-			self.window.blit(self.startButtonText, (850, 74))
+		self.startButton.draw(self.window)
 			# Reset Button
-		pygame.draw.rect(self.window, Color("black"), self.resetButton, 1)
-		self.window.blit(self.resetButtonText, (846, 154))
-			# Speed Up/Down Display
-		self.window.blit(self.speedText, (844, 210))
-		pygame.draw.rect(self.window, Color("black"), self.speedDisplayBox, 1)
+		self.resetButton.draw(self.window)
+			# Speed Label
+		self.window.blit(self.speedText, (844, 200))
+			# Speed Arrows
 		pygame.draw.polygon(self.window, Color("black"), self.speedUpButton.getPoints(), 1)
 		pygame.draw.polygon(self.window, Color("black"), self.speedDownButton.getPoints(), 1)
-		self.window.blit(pygame.font.Font(None, 30).render(str(self.calcThread.speed), 1, Color("black")), (894,234))
-
+			# Speed Display Box
+		self.speedDisplayBox.draw(self.window)
+		
 		# Run the calculations
 		if self.simRunning:
 			calc_status(self.grid)
@@ -154,6 +155,25 @@ class Cell(pygame.Rect):
 	def setStatus(self, alive):
 		self.alive = alive
 		
+
+# Rectangular Buttons
+class RectWithText(pygame.Rect):
+	# Constructor
+	def __init__(self, pos=Position(0, 0), size=Dimensions(120,41), text = "", font = None, fontSize = 20):
+		super().__init__((pos.left, pos.top), (size.width, size.height))
+		
+		self.fontPath = font
+		self.fontSize = fontSize
+		self.setText(text)
+
+	def setText(self, text):
+		self.text = pygame.font.Font(self.fontPath, self.fontSize).render(text, 1, Color("black"))
+		self.textPos = (self.centerx - (self.text.get_rect().width / 2), self.centery - (self.text.get_rect().height / 2))
+
+	def draw(self, window):
+		pygame.draw.rect(window, Color("black"), self, 1)
+		window.blit(self.text, self.textPos)
+
 # Triangle Buttons
 class TriButton():
 	# Constructor

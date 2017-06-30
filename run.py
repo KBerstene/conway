@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	calculations = CalcThread(interface)
 	
 	# Let interface know about calc thread so it can display speed
-	interface.calcThread = calculations
+	interface.setCalcThread(calculations)
 
 	# Start the calc thread
 	calculations.start()

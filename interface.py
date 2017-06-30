@@ -131,10 +131,6 @@ class Interface():
 			# Speed Display Box
 		self.speedDisplayBox.draw(self.window)
 		
-		# Run the calculations
-		if self.simRunning:
-			calc_status(self.grid)
-
 		# Iterate through grid and print white square as dead and black square as alive
 		for row in self.grid:
 			for cell in row:

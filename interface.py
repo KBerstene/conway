@@ -9,31 +9,29 @@ from controls import Controls
 
 class Interface():
 	# Constructor
-	def __init__(self, calcThread=None):
+	def __init__(self, resolution = Dimensions(1001, 601), calcThread=None):
 		# Declare constants
 			# General
 		self.fpsLimit = 60
 		self.simRunning = False
 		self.calcThread = calcThread
 			# Section sizes
-		self.grid_width = 801
 		self.control_width = 200
-		self.window_height = 601
 		
 		# Initialize pygame window
 		pygame.init()
-		self.window = pygame.display.set_mode((self.grid_width + self.control_width, self.window_height))
+		self.window = pygame.display.set_mode(resolution, pygame.RESIZABLE)
 		pygame.display.set_caption("Conway's Game of Life")
 		
 		# Create clock to limit FPS
 		self.fpsClock = pygame.time.Clock()
 
 		# Create the initial grid
-		self.grid = Grid(Dimensions(self.grid_width, self.window_height), Position(0, 0))
+		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
 
 		# Create control section
-		self.controls = Controls(Dimensions(self.control_width, self.window_height),
-								Position(self.grid_width, 0), self)
+		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
+								Position(self.grid.rect.width, 0), self)
 
 
 	def setCalcThread(self,calcThread):
@@ -70,6 +68,8 @@ class Interface():
 					self.grid.collidepoint(pygame.mouse.get_pos())
 			elif event.type == KEYDOWN:
 				pass
+			elif event.type == VIDEORESIZE:
+				self.resize(event.dict['size'])
 			else:
 				pass
 		return True
@@ -85,5 +85,10 @@ class Interface():
 		# Draw grid
 		self.grid.draw(self.window)
 
+	def resize(self, size):
+		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
+		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
+		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
+	
 	def reset(self):
-		self.__init__(self.calcThread)
+		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)

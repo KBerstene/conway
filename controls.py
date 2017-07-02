@@ -4,13 +4,13 @@ import pygame
 from namedtuples import *
 
 # Main control panel
-class Controls(pygame.Surface):
+class Controls():
 	# Constructor
 	def __init__(self, dimensions, location, interface):
-		super().__init__(dimensions)
+		self.surface = pygame.Surface(dimensions)
 		
 		self.fontPath = "res/trebuc.ttf"
-		self.rect = self.get_rect(left=location.left, top=location.top)
+		self.rect = self.surface.get_rect(left=location.left, top=location.top)
 		self.interface = interface
 		
 		self.startButton = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
@@ -56,6 +56,9 @@ class Controls(pygame.Surface):
 				if (self.interface.calcThread.speed > 1):
 					self.interface.calcThread.speed -=1
 					self.speedDisplayBox.setText(str(self.interface.calcThread.speed))
+	
+	def resize(self, size, position):
+		pass
 
 # Rectangular Buttons
 class RectWithText(pygame.Rect):

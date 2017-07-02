@@ -7,12 +7,17 @@ from namedtuples import *
 class Controls():
 	# Constructor
 	def __init__(self, dimensions, location, interface):
+		# Create surface and static rect
 		self.surface = pygame.Surface(dimensions)
-		
-		self.fontPath = "res/trebuc.ttf"
 		self.rect = self.surface.get_rect(left=location.left, top=location.top)
+		
+		# Set font
+		self.fontPath = "res/trebuc.ttf"
+		
+		# Link interface
 		self.interface = interface
 		
+		# Create buttons
 		self.startButton = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
 		self.resetButton = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath)
 		self.speedText=pygame.font.Font(self.fontPath, 20).render("Speed", 1, pygame.Color("black"))
@@ -58,7 +63,18 @@ class Controls():
 					self.speedDisplayBox.setText(str(self.interface.calcThread.speed))
 	
 	def resize(self, size, position):
-		pass
+		# Resize surface
+		self.surface = pygame.transform.scale(self.surface, size)
+		self.rect = self.surface.get_rect(left=position.left, top=position.top)
+		
+		# Regenerate buttons
+		self.startButton = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
+		self.resetButton = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath)
+		self.speedText=pygame.font.Font(self.fontPath, 20).render("Speed", 1, pygame.Color("black"))
+		self.speedDisplayBox = RectWithText(Position(self.rect.left + 69,230), Dimensions(61, 31), "2", self.fontPath)
+		self.speedUpButton=TriButton(Coordinates(self.rect.left + 158,245),Coordinates(self.rect.left + 134,230),Coordinates(self.rect.left + 134,260))
+		self.speedDownButton=TriButton(Coordinates(self.rect.left + 39,245),Coordinates(self.rect.left + 64,230),Coordinates(self.rect.left + 64,260))
+		
 
 # Rectangular Buttons
 class RectWithText(pygame.Rect):

@@ -7,6 +7,7 @@ from namedtuples import *
 class Grid():
 	# Constructor
 	def __init__(self, dimensions, location):
+		# Create surface and static rect
 		self.surface = pygame.Surface(dimensions)
 		self.rect = self.surface.get_rect(left=location.left, top=location.top)
 		

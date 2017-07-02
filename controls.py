@@ -13,12 +13,12 @@ class Controls(pygame.Surface):
 		self.rect = self.get_rect(left=location.left, top=location.top)
 		self.interface = interface
 		
-		self.startButton = RectWithText(Position(840, 60), Dimensions(120,41), "Start", self.fontPath)
-		self.resetButton = RectWithText(Position(840, 140), Dimensions(120,41), "Reset", self.fontPath)
+		self.startButton = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
+		self.resetButton = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath)
 		self.speedText=pygame.font.Font(self.fontPath, 20).render("Speed", 1, pygame.Color("black"))
-		self.speedDisplayBox = RectWithText(Position(870,230), Dimensions(61, 31), "2", self.fontPath)
-		self.speedUpButton=TriButton(Coordinates(959,245),Coordinates(935,230),Coordinates(935,260))
-		self.speedDownButton=TriButton(Coordinates(840,245),Coordinates(865,230),Coordinates(865,260))
+		self.speedDisplayBox = RectWithText(Position(self.rect.left + 69,230), Dimensions(61, 31), "2", self.fontPath)
+		self.speedUpButton=TriButton(Coordinates(self.rect.left + 158,245),Coordinates(self.rect.left + 134,230),Coordinates(self.rect.left + 134,260))
+		self.speedDownButton=TriButton(Coordinates(self.rect.left + 39,245),Coordinates(self.rect.left + 64,230),Coordinates(self.rect.left + 64,260))
 		
 	def draw(self, surface):
 		# Draw control buttons

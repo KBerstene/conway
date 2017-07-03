@@ -16,22 +16,22 @@ class Grid():
 		self.gridHeight = math.ceil((dimensions.height - 1) / 20)
 	
 		# Create a array of cells
-		self.array = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
+		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
 		
 		# Set each square's position
 		for i in range(self.gridWidth):
 			for j in range(self.gridHeight):
-				self.array[i][j] = Cell(Position((i*20) + self.rect.left, (j*20) + self.rect.top))
+				self.cells[i][j] = Cell(Position((i*20) + self.rect.left, (j*20) + self.rect.top))
 
 	def draw(self, surface):
 		# Iterate through grid and print white square as dead and black square as alive
-		for row in self.array:
+		for row in self.cells:
 			for cell in row:
 				pygame.draw.rect(surface, pygame.Color("black"), cell, not(cell.alive))
 	
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):
-			for row in self.array:
+			for row in self.cells:
 				for cell in row:
 					if cell.collidepoint(pos):
 						cell.alive = not(cell.alive)
@@ -54,11 +54,11 @@ class Grid():
 		for i in range(self.gridWidth):
 			for j in range(self.gridHeight):
 				try:
-					newArray[i][j] = self.array[i][j]
+					newArray[i][j] = self.cells[i][j]
 				except (IndexError):
 					newArray[i][j] = Cell(Position((i*20) + self.rect.left, (j*20) + self.rect.top))
 		
-		self.array = newArray
+		self.cells = newArray
 
 		
 # Subclass of Rect to add alive/dead status

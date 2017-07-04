@@ -19,13 +19,16 @@ class Controls():
 		
 		# Create buttons and labels
 		self.controlItems = {}
+		self.populateItems()
+	
+	def populateItems(self):
 		self.controlItems['startButton'] = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
 		self.controlItems['resetButton'] = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath)
 		self.controlItems['speedText'] = Label("Speed", Position(self.rect.left + 43, 200), self.fontPath, 20)
 		self.controlItems['speedDisplayBox'] = RectWithText(Position(self.rect.left + 69,230), Dimensions(61, 31), "2", self.fontPath)
-		self.controlItems['speedUpButton'] = TriButton(Coordinates(self.rect.left + 158,245),Coordinates(self.rect.left + 134,230),Coordinates(self.rect.left + 134,260))
-		self.controlItems['speedDownButton'] = TriButton(Coordinates(self.rect.left + 39,245),Coordinates(self.rect.left + 64,230),Coordinates(self.rect.left + 64,260))
-		
+		self.controlItems['speedUpButton'] = TriButton(Position(self.rect.left + 134, 230))
+		self.controlItems['speedDownButton'] = TriButton(Position(self.rect.left + 40, 230), flip = True)
+	
 	def draw(self, surface):
 		# Draw control items
 		for item in self.controlItems:
@@ -60,12 +63,8 @@ class Controls():
 		self.rect = self.surface.get_rect(left=position.left, top=position.top)
 		
 		# Regenerate control items
-		self.controlItems['startButton'] = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
-		self.controlItems['resetButton'] = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath)
-		self.controlItems['speedText'] = Label("Speed", Position(self.rect.left + 43, 200), self.fontPath, 20)
-		self.controlItems['speedDisplayBox'] = RectWithText(Position(self.rect.left + 69,230), Dimensions(61, 31), "2", self.fontPath)
-		self.controlItems['speedUpButton'] = TriButton(Coordinates(self.rect.left + 158,245),Coordinates(self.rect.left + 134,230),Coordinates(self.rect.left + 134,260))
-		self.controlItems['speedDownButton'] = TriButton(Coordinates(self.rect.left + 39,245),Coordinates(self.rect.left + 64,230),Coordinates(self.rect.left + 64,260))
+		self.populateItems()
+		self.updateSpeedDisplay(self.interface.calcThread.speed)
 		
 
 # Rectangular Buttons
@@ -89,10 +88,14 @@ class RectWithText(pygame.Rect):
 # Triangle Buttons
 class TriButton():
 	# Constructor
-	def __init__(self, coords1, coords2, coords3):
-		self.x = (coords1.x, coords2.x, coords3.x)
-		self.y = (coords1.y, coords2.y, coords3.y)
-
+	def __init__(self, pos = Position(0, 0), size = Dimensions(24, 30), flip = False):
+		if (flip):
+			self.x = (pos.left, pos.left + size.width, pos.left + size.width)
+			self.y = (pos.top + (size.height / 2), pos.top, pos.top + size.height)
+		else:
+			self.x = (pos.left + size.width, pos.left, pos.left)
+			self.y = (pos.top + (size.height / 2), pos.top, pos.top + size.height)
+			
 	def draw(self, surface):
 		pygame.draw.polygon(surface, pygame.Color("black"), self.getPoints(), 1)
 	

@@ -92,3 +92,19 @@ class Interface():
 	
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
+		self.calcThread.__init__(self)
+
+	def pause(self):
+		self.simRunning = not(self.simRunning)
+		return self.simRunning
+
+	def speedUp(self):
+		if (self.calcThread.speed < 9):
+			self.calcThread.speed += 1
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def speedDown(self):
+		if (self.calcThread.speed > 1):
+			self.calcThread.speed -= 1
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
+	

@@ -22,12 +22,12 @@ class Controls():
 		self.populateItems()
 	
 	def populateItems(self):
-		self.controlItems['startButton'] = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath)
-		self.controlItems['resetButton'] = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath)
+		self.controlItems['startButton'] = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath, click = lambda:(self.controlItems['startButton'].setText("Pause")) if self.interface.pause() else self.controlItems['startButton'].setText("Start"))
+		self.controlItems['resetButton'] = RectWithText(Position(self.rect.left + 39, 140), Dimensions(120,41), "Reset", self.fontPath, click = lambda:self.interface.reset())
 		self.controlItems['speedText'] = Label("Speed", Position(self.rect.left + 43, 200), self.fontPath, 20)
 		self.controlItems['speedDisplayBox'] = RectWithText(Position(self.rect.left + 69,230), Dimensions(61, 31), "2", self.fontPath)
-		self.controlItems['speedUpButton'] = TriButton(Position(self.rect.left + 134, 230))
-		self.controlItems['speedDownButton'] = TriButton(Position(self.rect.left + 40, 230), flip = True)
+		self.controlItems['speedUpButton'] = TriButton(Position(self.rect.left + 134, 230), click = lambda:self.interface.speedUp())
+		self.controlItems['speedDownButton'] = TriButton(Position(self.rect.left + 40, 230), flip = True, click = lambda:self.interface.speedDown())
 	
 	def draw(self, surface):
 		# Draw control items
@@ -39,23 +39,10 @@ class Controls():
 	
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):
-			if self.controlItems['startButton'].collidepoint(pos):
-				if self.interface.simRunning:
-					self.interface.simRunning=False
-					self.controlItems['startButton'].setText("Start")
-				else:
-					self.interface.simRunning=True
-					self.controlItems['startButton'].setText("Pause")
-			elif self.controlItems['resetButton'].collidepoint(pos):
-				self.interface.reset()
-			elif self.controlItems['speedUpButton'].collidepoint(pos):
-				if (self.interface.calcThread.speed < 9):
-					self.interface.calcThread.speed +=1
-					self.controlItems['speedDisplayBox'].setText(str(self.interface.calcThread.speed))
-			elif self.controlItems['speedDownButton'].collidepoint(pos):
-				if (self.interface.calcThread.speed > 1):
-					self.interface.calcThread.speed -=1
-					self.controlItems['speedDisplayBox'].setText(str(self.interface.calcThread.speed))
+			for key, item in self.controlItems.items():
+				if item.collidepoint(pos):
+					item.clickAction()
+					break
 	
 	def resize(self, size, position):
 		# Resize surface
@@ -70,8 +57,9 @@ class Controls():
 # Rectangular Buttons
 class RectWithText(pygame.Rect):
 	# Constructor
-	def __init__(self, pos=Position(0, 0), size=Dimensions(120,41), text = "", font = None, fontSize = 20):
+	def __init__(self, pos=Position(0, 0), size=Dimensions(120,41), text = "", font = None, fontSize = 20, click = lambda:None):
 		super().__init__((pos.left, pos.top), (size.width, size.height))
+		self.clickAction = click
 		
 		self.fontPath = font
 		self.fontSize = fontSize
@@ -88,7 +76,8 @@ class RectWithText(pygame.Rect):
 # Triangle Buttons
 class TriButton():
 	# Constructor
-	def __init__(self, pos = Position(0, 0), size = Dimensions(24, 30), flip = False):
+	def __init__(self, pos = Position(0, 0), size = Dimensions(24, 30), flip = False, click = lambda:None):
+		self.clickAction = click
 		if (flip):
 			self.x = (pos.left, pos.left + size.width, pos.left + size.width)
 			self.y = (pos.top + (size.height / 2), pos.top, pos.top + size.height)
@@ -115,8 +104,10 @@ class Label():
 	# Constructor
 	def __init__(self, text, pos = Position(0, 0), fontPath = None, size = 20):
 		self.pos = pos
-		self.labelSurface = pygame.font.Font(fontPath, 20).render("Speed", 1, pygame.Color("black"))
+		self.labelSurface = pygame.font.Font(fontPath, 20).render(text, 1, pygame.Color("black"))
 	
 	def draw(self, surface):
 		surface.blit(self.labelSurface, self.pos)
 	
+	def collidepoint(self, *args, **kwargs):
+		pass

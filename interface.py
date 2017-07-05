@@ -96,6 +96,7 @@ class Interface():
 
 	def pause(self):
 		self.simRunning = not(self.simRunning)
+		print("intpause")
 		return self.simRunning
 
 	def speedUp(self):

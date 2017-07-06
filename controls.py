@@ -24,10 +24,13 @@ class Controls():
 		self.populateItems()
 	
 	def populateItems(self):
-		self.addControl([ RectWithText(text = "Start", font = self.fontPath, click = lambda:(self.controls[0].objects[0].setText("Pause")) if self.interface.pause() else self.controls[0].objects[0].setText("Start")) ])
+		self.addControl([ RectWithText(text = "Start", font = self.fontPath, click = lambda:self.updateStatusDisplay(self.interface.pause())) ])
 		self.addControl([ RectWithText(text = "Reset", font = self.fontPath, click = lambda:self.interface.reset()) ])
-		self.addControl([ Label(text = "Speed", font = self.fontPath, size = 20) ])
-		self.addControl([ TriButton(flip = True, click = lambda:self.interface.speedDown()), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.interface.speedUp()) ])
+		self.addControl([ Label(text = "Speed", font = self.fontPath, size = 16) ])
+		self.addControl([ TriButton(flip = True, click = lambda:self.updateSpeedDisplay(self.interface.speedDown())), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.updateSpeedDisplay(self.interface.speedUp())) ])
+		self.addControl([ Label(text = "Step Forward", font = self.fontPath, size = 18), TriButton(click = lambda:self.updateStatusDisplay(self.interface.stepForward())) ])
+		
+		self.simStatusDisplay = self.controls[0].objects[0]
 		self.speedDisplay = self.controls[3].objects[1]
 	
 	def addControl(self, objectList):
@@ -41,6 +44,12 @@ class Controls():
 		for item in self.controls:
 			item.draw(surface)
 		
+	def updateStatusDisplay(self, simRunning):
+		if simRunning:
+			self.controls[0].objects[0].setText("Pause")
+		else:
+			self.controls[0].objects[0].setText("Start")
+	
 	def updateSpeedDisplay(self, speed):
 		self.speedDisplay.setText(str(speed))
 		
@@ -97,7 +106,7 @@ class ControlWrapper():
 		# Center objects
 		for i in range(len(self.objects)):
 			# Center vertically
-			self.objects[i].top = padding
+			self.objects[i].top = math.floor((self.height - self.objects[i].height) / 2)
 			# Center horizontally
 			self.objects[i].left = leftPadding + padding
 			# Set new left
@@ -188,9 +197,9 @@ class TriButton():
 class Label(pygame.Surface):
 	# Constructor
 	def __init__(self, text, pos = Position(0, 0), font = None, size = 20):
-		super().__init__(pygame.font.Font(font, 20).size(text))
+		super().__init__(pygame.font.Font(font, size).size(text))
 		super().fill(pygame.Color("white"))
-		super().blit(pygame.font.Font(font, 20).render(text, 1, pygame.Color("black")), (0,0))
+		super().blit(pygame.font.Font(font, size).render(text, 1, pygame.Color("black")), (0,0))
 		self.left = pos.left
 		self.top = pos.top
 		self.width = super().get_rect().width

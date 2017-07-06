@@ -15,5 +15,8 @@ class CalcThread(Thread):
 	def run(self):
 		while (True):
 			if self.interface.simRunning:
-				calc_status(self.interface.grid)
+				self.calc()
 				sleep(1.0/self.speed)
+
+	def calc(self):
+		calc_status(self.interface.grid)

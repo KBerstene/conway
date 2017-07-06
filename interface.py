@@ -101,10 +101,16 @@ class Interface():
 	def speedUp(self):
 		if (self.calcThread.speed < 9):
 			self.calcThread.speed += 1
-			self.controls.updateSpeedDisplay(self.calcThread.speed)
+		return self.calcThread.speed
 	
 	def speedDown(self):
 		if (self.calcThread.speed > 1):
 			self.calcThread.speed -= 1
-			self.controls.updateSpeedDisplay(self.calcThread.speed)
+		return self.calcThread.speed
+	
+	def stepForward(self):
+		if self.simRunning:
+			self.pause()
+		self.calcThread.calc()
+		return self.simRunning
 	

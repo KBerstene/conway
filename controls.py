@@ -4,6 +4,7 @@ import pygame
 import math
 from namedtuples import *
 from collections import Iterable
+from functools import partial
 
 # Main control panel
 class Controls():
@@ -29,6 +30,7 @@ class Controls():
 		self.addControl([ Label(text = "Speed", font = self.fontPath, size = 16) ])
 		self.addControl([ TriButton(flip = True, click = lambda:self.updateSpeedDisplay(self.interface.speedDown())), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.updateSpeedDisplay(self.interface.speedUp())) ])
 		self.addControl([ Label(text = "Step Forward", font = self.fontPath, size = 18), TriButton(click = lambda:self.updateStatusDisplay(self.interface.stepForward())) ])
+		self.addControlPadding() # Fill the rest of the control panel with white
 		
 		self.simStatusDisplay = self.controls[0].objects[0]
 		self.speedDisplay = self.controls[3].objects[1]
@@ -38,6 +40,16 @@ class Controls():
 			self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, objectList))
 		else:
 			self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, objectList))
+			
+	def addControlPadding(self):
+		# The bottom of the last object is the top of the final padding
+		top = self.controls[len(self.controls) - 1].top + self.controls[len(self.controls) - 1].height
+		left = self.rect.left
+		width = self.rect.width
+		height = self.rect.height - top
+		
+		paddingRect = Rectangle((left, top), (width, height))
+		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
 	
 	def draw(self, surface):
 		# Draw control items
@@ -134,6 +146,17 @@ class ControlWrapper():
 				return True
 		return False
 		
+# Blank rectangle that can self-draw
+class Rectangle(pygame.Rect):
+	# Constructor
+	def __init__(self, pos = Position(0, 0), size = Dimensions(0, 0), fill = pygame.Color("white"), outline = False):
+		super().__init__(pos, size)
+		self.outline = outline
+		self.fill = fill
+		
+	def draw(self, surface):
+		pygame.draw.rect(surface, self.fill, self, self.outline)
+	
 
 # Rectangular Buttons
 class RectWithText(pygame.Rect):

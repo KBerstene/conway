@@ -79,12 +79,12 @@ class Interface():
 		# Set background as white
 		self.window.fill(pygame.Color("white"))
 
-		# Draw control interface
-		self.controls.draw(self.window)
-		
 		# Draw grid
 		self.grid.draw(self.window)
 
+		# Draw control interface
+		self.controls.draw(self.window)
+		
 	def resize(self, size):
 		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
 		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))

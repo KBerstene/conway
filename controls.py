@@ -42,15 +42,10 @@ class Controls():
 			item.draw(surface)
 		
 	def updateSpeedDisplay(self, speed):
-		#self.controlItems['speedDisplayBox'].setText(str(speed))
 		self.speedDisplay.setText(str(speed))
 		
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):
-			# for key, item in self.controlItems.items():
-				# if item.collidepoint(pos):
-					# item.clickAction()
-					# break
 			for item in self.controls:
 				if item.collidepoint(pos):
 					item.clickAction()

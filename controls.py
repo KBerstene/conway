@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import pygame
+import math
 from namedtuples import *
 from collections import Iterable
 
@@ -27,7 +28,7 @@ class Controls():
 		self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, [ RectWithText(text = "Start", font = self.fontPath, click = lambda:(self.controls[0].objects[0].setText("Pause")) if self.interface.pause() else self.controls[0].objects[0].setText("Start")) ]))
 		self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, [ RectWithText(text = "Reset", font = self.fontPath, click = lambda:self.interface.reset()) ]))
 		self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, [ Label(text = "Speed", font = self.fontPath, size = 20) ]))
-		self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, [ TriButton(click = lambda:self.interface.speedUp()), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(flip = True, click = lambda:self.interface.speedDown()) ]))
+		self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, [ TriButton(flip = True, click = lambda:self.interface.speedDown()), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.interface.speedUp()) ]))
 		#self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, [ TriButton(click = lambda:self.interface.speedUp()) ]))
 		#self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, [ TriButton(flip = True, click = lambda:self.interface.speedDown()) ]))
 		# self.controlItems['startButton'] = RectWithText(Position(self.rect.left + 39, 60), Dimensions(120,41), "Start", self.fontPath, click = lambda:(self.controlItems['startButton'].setText("Pause")) if self.interface.pause() else self.controlItems['startButton'].setText("Start"))
@@ -46,6 +47,7 @@ class Controls():
 		
 	def updateSpeedDisplay(self, speed):
 		#self.controlItems['speedDisplayBox'].setText(str(speed))
+		#self.controls[3].objects[1].setText(str(speed))
 		pass
 	
 	def collidepoint(self, pos):
@@ -84,12 +86,21 @@ class ControlWrapper():
 		self.width = width
 		self.height = self.surface.get_rect().height
 		
-		# Center objects
+		# Get amount of extra width around objects
+		spareWidth = width - padding # Initial left padding
 		for obj in self.objects:
+			spareWidth -= obj.width # object width
+			spareWidth -= padding # right padding
+		
+		leftPadding = math.floor(spareWidth / 2) # round down so it falls left
+		# Center objects
+		for i in range(len(self.objects)):
 			# Center vertically
-			obj.top = padding
+			self.objects[i].top = padding
 			# Center horizontally
-			obj.left = (width - self.objects[0].width) / 2
+			self.objects[i].left = leftPadding + padding
+			# Set new left
+			leftPadding = self.objects[i].left + self.objects[i].width
 			
 		# Draw objects
 		for obj in self.objects:
@@ -133,30 +144,43 @@ class RectWithText(pygame.Rect):
 class TriButton():
 	# Constructor
 	def __init__(self, pos = Position(0, 0), size = Dimensions(24, 30), flip = False, click = lambda:None):
+		# Create surface and set clickAction
+		self.surface = pygame.Surface((size.width + 1, size.height + 1))
 		self.clickAction = click
+		
+		# Set points
 		if (flip):
 			self.x = (pos.left, pos.left + size.width, pos.left + size.width)
-			self.y = (pos.top + (size.height / 2), pos.top, pos.top + size.height)
+			self.y = (pos.top + ((size.height) / 2), pos.top, pos.top + size.height)
 		else:
 			self.x = (pos.left + size.width, pos.left, pos.left)
-			self.y = (pos.top + (size.height / 2), pos.top, pos.top + size.height)
+			self.y = (pos.top + ((size.height) / 2), pos.top, pos.top + size.height)
+
+		# Set constants
 		self.width = size.width
 		self.height = size.height
-			
+		self.left = pos.left
+		self.top = pos.top
+
+		# Draw onto surface
+		self.surface.fill(pygame.Color("white"))
+		pygame.draw.polygon(self.surface, pygame.Color("black"), self.getPoints(), 1)
+		
 	def draw(self, surface):
-		pygame.draw.polygon(surface, pygame.Color("black"), self.getPoints(), 1)
+		surface.blit(self.surface, (self.left, self.top))
 	
 	def getPoints(self):
 		return ((self.x[0], self.y[0]), (self.x[1], self.y[1]), (self.x[2], self.y[2]))
 
 	def collidepoint(self, mouse_pos):
-		mouse_x = mouse_pos[0]
-		mouse_y = mouse_pos[1]
-		if mouse_x < min(self.x) or mouse_x > max(self.x):
-			return False
-		if mouse_y < min(self.y) or mouse_y > max(self.y):
-			return False
-		return True
+		return self.surface.get_rect(left = self.left, top = self.top).collidepoint(mouse_pos)
+		# mouse_x = mouse_pos[0]
+		# mouse_y = mouse_pos[1]
+		# if mouse_x < min(self.x) or mouse_x > max(self.x):
+			# return False
+		# if mouse_y < min(self.y) or mouse_y > max(self.y):
+			# return False
+		# return True
 
 
 class Label(pygame.Surface):

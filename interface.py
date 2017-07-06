@@ -63,9 +63,17 @@ class Interface():
 				pygame.quit()
 				return False
 			elif event.type == MOUSEBUTTONDOWN:
-				if event.button == 1:
+				if event.button == 1: # Left click
 					self.controls.collidepoint(pygame.mouse.get_pos())
 					self.grid.collidepoint(pygame.mouse.get_pos())
+				elif event.button == 4: # Scroll wheel up
+					# Zoom in
+					pass
+				elif event.button == 5: # Scroll wheel down
+					# Zoom out
+					pass
+				else:
+					pass
 			elif event.type == KEYDOWN:
 				pass
 			elif event.type == VIDEORESIZE:

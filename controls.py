@@ -157,6 +157,8 @@ class Rectangle(pygame.Rect):
 	def draw(self, surface):
 		pygame.draw.rect(surface, self.fill, self, self.outline)
 	
+	def clickAction(self, *args, **kwargs):
+		pass
 
 # Rectangular Buttons
 class RectWithText(pygame.Rect):

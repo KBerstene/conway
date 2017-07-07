@@ -70,6 +70,14 @@ class Grid():
 						return True
 		return False
 	
+	def getCell(self, pos):
+		if self.rect.collidepoint(pos):
+			for row in self.cells:
+				for cell in row:
+					if cell.collidepoint(pos):
+						return cell
+		return None
+	
 	def resize(self, size, position):
 		# Resize surface
 		self.surface = pygame.transform.scale(self.surface, size)
@@ -101,3 +109,11 @@ class Cell(pygame.Rect):
 		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
 		self.alive=False
 		self.neighbors=[]
+	
+	def resize(self, newSize):
+		self.width = newSize.width
+		self.height = newSize.height
+	
+	def move(self, newPos):
+		self.left = newPos.left
+		self.top = newPos.top

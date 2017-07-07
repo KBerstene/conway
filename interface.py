@@ -82,11 +82,9 @@ class Interface():
 					self.controls.collidepoint(pygame.mouse.get_pos())
 					self.grid.collidepoint(pygame.mouse.get_pos())
 				elif event.button == 4: # Scroll wheel up
-					# Zoom in
-					pass
+					self.zoomIn(pygame.mouse.get_pos()) # Zoom in
 				elif event.button == 5: # Scroll wheel down
-					# Zoom out
-					pass
+					self.zoomOut(pygame.mouse.get_pos()) # Zoom out
 				else:
 					pass
 			elif event.type == KEYDOWN:
@@ -116,7 +114,6 @@ class Interface():
 			else:
 				pass
 		return True
-		
 	
 	def draw(self):
 		# Set background as white
@@ -128,27 +125,13 @@ class Interface():
 		# Draw control interface
 		self.controls.draw(self.window)
 		
-	def resize(self, size):
-		# Resize window
-		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
-		
-		# Resize grid
-		if (self.window.get_rect().width < self.control_width):
-			# Grid size is less than zero, so set it to 2x2 pixels instead
-			# (which should create a single cell).
-			# It will get covered by the controls, anyway.
-			# If grid is 0x0 and the calcThread starts, it will crash
-			self.grid.resize(Dimensions(2, 2), Position(0, 0))
-		else:
-			self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
-		
-		# Resize controls
-		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
-	
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
 		self.calcThread.__init__(self)
 
+	#################################
+	# Simulation speed manipulation #
+	#################################
 	def pause(self):
 		self.simRunning = not(self.simRunning)
 		self.controls.updateStatusDisplay(self.simRunning)
@@ -186,4 +169,31 @@ class Interface():
 		if self.simRunning:
 			self.pause()
 		self.calcThread.calc()
+		return self.simRunning
+	
+	################################
+	# Visual size manipulation     #
+	################################
+	def resize(self, size):
+		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
+		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
+		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
+	
+	def zoomIn(self, pos, sizeChange = 2):
+		# Get the cell that was zoomed in on
+		cell = self.grid.getCell(pos)
+		
+		if cell != None:
+			# Calculate where the cell should be under the mouse after resizing
+			relativePos = Position(pos[0] - cell.left, pos[1] - cell.top)
+			newSize = Dimensions(cell.width + sizeChange, cell.height + sizeChange)
+			sizeRatio = Dimensions(newSize.width/cell.width, newSize.height/cell.height)
+			newPos = Position(pos[0] - (sizeRatio.width * relativePos.left), pos[1] - (sizeRatio.height * relativePos.top))
+			
+			# Resize and move
+			cell.resize(newSize)
+			cell.move(newPos)
+	
+	def zoomOut(self, pos, sizeChange = -2):
+		self.zoomIn(pos, sizeChange)
 	

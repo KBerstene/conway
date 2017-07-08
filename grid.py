@@ -59,6 +59,38 @@ class Grid():
 					newArray[i][j] = Cell(Position((i*20) + self.rect.left, (j*20) + self.rect.top))
 		
 		self.cells = newArray
+		
+		#create neighbors list
+		for i in range(self.gridWidth):
+			for j in range(self.gridHeight):
+				if i>0:
+					self.cells[i][j].neighbors.append(self.cells[i-1][j])
+					self.cells[i][j].neighbors.append(self.cells[i-1][j-1])
+					try:
+						self.cells[i][j].neighbors.append(self.cells[i-1][j+1])
+					except:
+						pass
+				if j>0:
+					self.cells[i][j].neighbors.append(self.cells[i][j-1])
+					try:
+						self.cells[i][j].neighbors.append(self.cells[i+1][j-1])
+					except:
+						pass
+				try:
+					self.cells[i][j].neighbors.append(self.cells[i+1][j+1])
+				except:
+					pass
+				try:
+					self.cells[i][j].neighbors.append(self.cells[i][j+1])
+				except:
+					pass
+				try:
+					self.cells[i][j].neighbors.append(self.cells[i+1][j])
+				except:
+					pass
+					
+				
+				
 
 		
 # Subclass of Rect to add alive/dead status
@@ -67,3 +99,4 @@ class Cell(pygame.Rect):
 	def __init__(self, pos=Position(0, 0), size=Dimensions(21, 21)):
 		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
 		self.alive=False
+		self.neighbors=[]

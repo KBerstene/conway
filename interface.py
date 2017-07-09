@@ -28,7 +28,7 @@ class Interface():
 
 		# Create the initial grid
 		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
-
+		
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
 								Position(self.grid.rect.width, 0), self)
@@ -86,8 +86,16 @@ class Interface():
 		self.controls.draw(self.window)
 		
 	def resize(self, size):
+		# Resize window
 		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
-		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
+		
+		# Resize grid
+		if (self.window.get_rect().width < self.control_width): # Grid size is less than zero, so set it to 1x1 instead.  It will get covered by the controls anyway
+			self.grid.resize(Dimensions(1,1), Position(0, 0))
+		else:
+			self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
+		
+		# Resize controls
 		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
 	
 	def reset(self):

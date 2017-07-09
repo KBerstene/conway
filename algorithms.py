@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 def calc_status(grid):
 	#variables
 	totalAliveNeighbors = 0
@@ -10,7 +9,7 @@ def calc_status(grid):
 	
     #create temporary array
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
-			 
+	
 	#1337 maths
 	for x in range(gridLength):
 		for y in range(gridHeight):

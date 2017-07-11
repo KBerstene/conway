@@ -17,7 +17,14 @@ class Interface():
 		self.calcThread = calcThread
 			# Section sizes
 		self.control_width = 200
-		
+			# Key presses
+		self.L_SHIFT = 1
+		self.R_SHIFT = 2
+		self.L_CTRL = 64
+		self.R_CTRL = 128
+		self.L_ALT = 256
+		self.R_ALT = 512
+	
 		# Declare variables
 		self.populationLimit = 3
 		self.populationMin = 2
@@ -75,12 +82,25 @@ class Interface():
 					self.controls.collidepoint(pygame.mouse.get_pos())
 					self.grid.collidepoint(pygame.mouse.get_pos())
 			elif event.type == KEYDOWN:
+				mods = pygame.key.get_mods()# Get modifier keys
 				if event.key == K_LEFT:
-					self.speedDown()
+					if mods == self.L_SHIFT:
+						self.popLimitDown()
+					elif mods == self.L_CTRL:
+						self.popMinDown()
+					else:
+						self.speedDown()
 				elif event.key == K_RIGHT:
-					self.speedUp()
+					if mods == self.L_SHIFT:
+						self.popLimitUp()
+					elif mods == self.L_CTRL:
+						self.popMinUp()
+					else:
+						self.speedUp()
 				elif event.key == K_SPACE:
 					self.pause()
+				elif event.key == K_RETURN:
+					self.stepForward()
 				else:
 					pass
 			elif event.type == VIDEORESIZE:

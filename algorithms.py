@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-def calc_status(grid):
+def calc_status(grid, populationLimit):
 	
 	#variables
 	totalAliveNeighbors = 0
-	populationLimit = 3
+	
 	populationMin = 2
 	gridLength = len(grid)
 	gridHeight = len(grid[0])

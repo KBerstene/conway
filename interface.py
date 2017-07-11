@@ -134,6 +134,26 @@ class Interface():
 			self.calcThread.speed -= 1
 			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
+	def popLimitUp(self):
+		if self.populationLimit < 8:
+			self.populationLimit += 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+	
+	def popLimitDown(self):
+		if self.populationLimit > 1:
+			self.populationLimit -= 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+			
+	def popMinUp(self):
+		if self.populationMin < 8:
+			self.populationMin += 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+			
+	def popMinDown(self):
+		if self.populationMin > 1:
+			self.populationMin -= 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+	
 	def stepForward(self):
 		if self.simRunning:
 			self.pause()

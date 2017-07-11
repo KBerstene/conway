@@ -4,8 +4,8 @@ def calc_status(grid):
 	#variables
 	totalAliveNeighbors = 0
 	populationLimit = 3
-	gridLength = len(grid.cells)
-	gridHeight = len(grid.cells[0])
+	gridLength = len(grid)
+	gridHeight = len(grid[0])
 	
     #create temporary array
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
@@ -14,15 +14,15 @@ def calc_status(grid):
 	for x in range(gridLength):
 		for y in range(gridHeight):
 			totalAliveNeighbors = 0
-			for z in range (len(grid.cells[x][y].neighbors)):	
-				if grid.cells[x][y].neighbors[z].alive == True:
+			for z in range (len(grid[x][y].neighbors)):	
+				if grid[x][y].neighbors[z].alive == True:
 					totalAliveNeighbors += 1
 			if totalAliveNeighbors < populationLimit-1:
 				tempGrid[x][y] = False
 				
 			elif totalAliveNeighbors == populationLimit-1:
 				
-				if grid.cells[x][y].alive == True:
+				if grid[x][y].alive == True:
 					tempGrid[x][y] = True
 				else:
 					tempGrid[x][y] = False
@@ -34,6 +34,6 @@ def calc_status(grid):
 				
 	for x in range(gridLength):
 		for y in range(gridHeight):
-			grid.cells[x][y].alive = tempGrid[x][y]
+			grid[x][y].alive = tempGrid[x][y]
 	  
 	  

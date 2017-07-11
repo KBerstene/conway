@@ -4,6 +4,7 @@ from interface import Interface
 from threads import *
 
 if __name__ == "__main__":
+	#total = 0
 	# Initialize the interface
 	interface = Interface()
 

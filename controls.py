@@ -26,14 +26,21 @@ class Controls():
 	
 	def populateItems(self):
 		self.addControl([ RectWithText(text = "Start", font = self.fontPath, click = lambda:self.interface.pause()) ])
-		self.addControl([ RectWithText(text = "Reset", font = self.fontPath, click = lambda:self.interface.reset()) ])
+		self.addControl([ Label(text = "Step Forward", font = self.fontPath, size = 18), TriButton(click = lambda:self.interface.stepForward()) ])
+		self.addControl([ Label(text = "Generation = ", font = self.fontPath, size = 16), Label(text = "0", font = self.fontPath, size = 16) ])
 		self.addControl([ Label(text = "Speed", font = self.fontPath, size = 16) ])
 		self.addControl([ TriButton(flip = True, click = lambda:self.interface.speedDown()), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.interface.speedUp()) ])
-		self.addControl([ Label(text = "Step Forward", font = self.fontPath, size = 18), TriButton(click = lambda:self.interface.stepForward()) ])
+		self.addControl([ Label(text = "Population Limit", font = self.fontPath, size = 16) ])
+		self.addControl([ TriButton(flip = True, click = lambda:self.interface.popLimitDown()), RectWithText(text = "3", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.interface.popLimitDown()) ])
+		self.addControl([ Label(text = "Population Minimum", font = self.fontPath, size = 16) ])
+		self.addControl([ TriButton(flip = True, click = lambda:self.interface.popMinDown()), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.interface.popMinDown()) ])
+		self.addControl([ RectWithText(text = "Reset", font = self.fontPath, click = lambda:self.interface.reset()) ])
 		self.addControlPadding() # Fill the rest of the control panel with white
 		
+		
+		
 		self.simStatusDisplay = self.controls[0].objects[0]
-		self.speedDisplay = self.controls[3].objects[1]
+		self.speedDisplay = self.controls[4].objects[1]
 	
 	def addControl(self, objectList):
 		if (len(self.controls) == 0):

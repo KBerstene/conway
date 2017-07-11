@@ -18,6 +18,11 @@ class Interface():
 			# Section sizes
 		self.control_width = 200
 		
+		# Declare variables
+		self.populationLimit = 3
+		self.populationMin = 2
+		self.generation = 0
+		
 		# Initialize pygame window
 		pygame.init()
 		self.window = pygame.display.set_mode(resolution, pygame.RESIZABLE)
@@ -60,7 +65,7 @@ class Interface():
 	def processEvents(self):
 		click_pos=(-1,-1)
 
-		# Get pygame events to see if exit is called
+		# Get pygame events to see if/what key is pressed
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
@@ -72,10 +77,8 @@ class Interface():
 			elif event.type == KEYDOWN:
 				if event.key == K_LEFT:
 					self.speedDown()
-					self.controls.updateSpeedDisplay(self.calcThread.speed)
 				elif event.key == K_RIGHT:
 					self.speedUp()
-					self.controls.updateSpeedDisplay(self.calcThread.speed)
 				elif event.key == K_SPACE:
 					self.pause()
 				else:

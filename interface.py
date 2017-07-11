@@ -26,6 +26,9 @@ class Interface():
 		# Create clock to limit FPS
 		self.fpsClock = pygame.time.Clock()
 
+		# Enable key hold repeating and set limits
+		pygame.key.set_repeat(500,75)
+		
 		# Create the initial grid
 		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
 		
@@ -67,7 +70,16 @@ class Interface():
 					self.controls.collidepoint(pygame.mouse.get_pos())
 					self.grid.collidepoint(pygame.mouse.get_pos())
 			elif event.type == KEYDOWN:
-				pass
+				if event.key == K_LEFT:
+					self.speedDown()
+					self.controls.updateSpeedDisplay(self.calcThread.speed)
+				elif event.key == K_RIGHT:
+					self.speedUp()
+					self.controls.updateSpeedDisplay(self.calcThread.speed)
+				elif event.key == K_SPACE:
+					self.pause()
+				else:
+					pass
 			elif event.type == VIDEORESIZE:
 				self.resize(event.dict['size'])
 			else:
@@ -108,20 +120,19 @@ class Interface():
 
 	def pause(self):
 		self.simRunning = not(self.simRunning)
-		return self.simRunning
+		self.controls.updateStatusDisplay(self.simRunning)
 
 	def speedUp(self):
 		self.calcThread.speed += 1
-		return self.calcThread.speed
+		self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def speedDown(self):
 		if (self.calcThread.speed > 1):
 			self.calcThread.speed -= 1
-		return self.calcThread.speed
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def stepForward(self):
 		if self.simRunning:
 			self.pause()
 		self.calcThread.calc()
-		return self.simRunning
 	

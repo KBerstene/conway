@@ -111,8 +111,7 @@ class Interface():
 		return self.simRunning
 
 	def speedUp(self):
-		if (self.calcThread.speed < 9):
-			self.calcThread.speed += 1
+		self.calcThread.speed += 1
 		return self.calcThread.speed
 	
 	def speedDown(self):

@@ -1,23 +1,23 @@
 #!/usr/bin/python
 
 def calc_status(grid, interface):
-	
 	# Declare variables
 	totalAliveNeighbors = 0
-	gridLength = len(grid)
-	gridHeight = len(grid[0])
-	
-    # Create temporary array based on grid size
+	cells = grid.cells
+	gridLength = len(cells)
+	gridHeight = len(cells[0])
+
+	# Create array of new alive/dead stats
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
 	
 	# Iterate through grid
 	for x in range(gridLength):
 		for y in range(gridHeight):
 			totalAliveNeighbors = 0
-			
+
 			# Add neighbors of each cell
-			for z in range (len(grid[x][y].neighbors)):	
-				if grid[x][y].neighbors[z].alive == True:
+			for z in range (len(cells[x][y].neighbors)):	
+				if cells[x][y].neighbors[z].alive == True:
 					totalAliveNeighbors += 1
 					if totalAliveNeighbors > interface.populationLimit:
 						break
@@ -26,7 +26,7 @@ def calc_status(grid, interface):
 			if totalAliveNeighbors < interface.populationMin:
 				tempGrid[x][y] = False
 			elif totalAliveNeighbors >= interface.populationMin and totalAliveNeighbors < interface.populationLimit:
-				tempGrid[x][y] = grid[x][y].alive
+				tempGrid[x][y] = cells[x][y].alive
 			elif totalAliveNeighbors == interface.populationLimit:
 				tempGrid[x][y] = True
 			else:
@@ -35,5 +35,6 @@ def calc_status(grid, interface):
 	# Iterate through tempgrid and update grid			
 	for x in range(gridLength):
 		for y in range(gridHeight):
-			grid[x][y].alive = tempGrid[x][y]
-	  
+			if cells[x][y].alive != tempGrid[x][y]:
+				cells[x][y].alive = tempGrid[x][y]
+				grid.cellsToDraw.append(cells[x][y])

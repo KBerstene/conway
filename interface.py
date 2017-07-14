@@ -6,6 +6,8 @@ from algorithms import *
 from namedtuples import *
 from grid import Grid
 from controls import Controls
+import time
+import math
 
 class Interface():
 	# Constructor
@@ -42,7 +44,7 @@ class Interface():
 		pygame.key.set_repeat(500,75)
 		
 		# Create the initial grid
-		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
+		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))#, cellSize = Dimensions(4,4))
 		
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
@@ -54,19 +56,22 @@ class Interface():
 		self.controls.updateSpeedDisplay(self.calcThread.speed)
 		
 	def update(self):
+		start = time.time()
 		# Process any mouse/keyboard events
 		if not self.processEvents():
 			return False
-
+		events = time.time()
 		# Draw objects
-		self.draw()
-
+		updates = self.draw()
+		draw = time.time()
 		# Update window
-		pygame.display.update()
-		
+		pygame.display.update(updates)
+		windowupdate = time.time()
 		# Limit FPS
 		self.fpsClock.tick(self.fpsLimit)
-
+		print("Events: " + str((events-start)*1000) + "ms")
+		print("Draw:   " + str((draw-events)*1000) + "ms")
+		print("Update: " + str((windowupdate-draw)*1000) + "ms")
 		return True
 		
 	def processEvents(self):
@@ -116,14 +121,17 @@ class Interface():
 		return True
 	
 	def draw(self):
-		# Set background as white
-		self.window.fill(pygame.Color("white"))
-
+		# Set list of rects that will be updated and returned
+		updateList = []
+	
 		# Draw grid
-		self.grid.draw(self.window)
+		updateList.extend(self.grid.draw(self.window))
 
 		# Draw control interface
-		self.controls.draw(self.window)
+		updateList.extend(self.controls.draw(self.window))
+				
+		# Return list of rects to be updated
+		return updateList
 		
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)

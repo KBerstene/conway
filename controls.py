@@ -61,10 +61,17 @@ class Controls():
 		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
 	
 	def draw(self, surface):
+		# Set list of rects that will be updated and returned
+		updateList = []
+		
 		# Draw control items
 		for item in self.controls:
 			item.draw(surface)
+			updateList.append(item.get_rect())
 		
+		# Return list of rects to be updated on surface
+		return updateList
+	
 	def updateStatusDisplay(self, simRunning):
 		if simRunning:
 			self.controls[0].objects[0].setText("Pause")
@@ -160,6 +167,9 @@ class ControlWrapper():
 				self.clickAction = obj.clickAction
 				return True
 		return False
+	
+	def get_rect(self):
+		return self.surface.get_rect(left = self.pos[0], top = self.pos[1])
 		
 # Blank rectangle that can self-draw
 class Rectangle(pygame.Rect):

@@ -3,7 +3,7 @@
 def calc_status(grid):
 	# Variables
 	totalAliveNeighbors = 0
-	populationLimit = 2
+	populationLimit = 3
 	cells = grid.cells
 	gridLength = len(cells)
 	gridHeight = len(cells[0])

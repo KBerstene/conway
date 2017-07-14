@@ -6,8 +6,6 @@ from algorithms import *
 from namedtuples import *
 from grid import Grid
 from controls import Controls
-import time
-import math
 
 class Interface():
 	# Constructor
@@ -44,22 +42,19 @@ class Interface():
 		self.controls.updateSpeedDisplay(self.calcThread.speed)
 		
 	def update(self):
-		start = time.time()
 		# Process any mouse/keyboard events
 		if not self.processEvents():
 			return False
-		events = time.time()
+		
 		# Draw objects
 		updates = self.draw()
-		draw = time.time()
+		
 		# Update window
 		pygame.display.update(updates)
-		windowupdate = time.time()
+		
 		# Limit FPS
 		self.fpsClock.tick(self.fpsLimit)
-		print("Events: " + str((events-start)*1000) + "ms")
-		print("Draw:   " + str((draw-events)*1000) + "ms")
-		print("Update: " + str((windowupdate-draw)*1000) + "ms")
+		
 		return True
 		
 	def processEvents(self):

@@ -17,7 +17,7 @@ class Grid():
 		self.gridHeight = math.ceil((dimensions.height - 1) / (cellSize.height - 1))
 		
 		# Create list of cells that need to be drawn
-		self.cellsToDraw = []
+		self.cellsToRedraw = []
 	
 		# Create an array of cells
 		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
@@ -26,7 +26,7 @@ class Grid():
 		for i in range(self.gridWidth):
 			for j in range(self.gridHeight):
 				self.cells[i][j] = Cell(Position((i*(cellSize.width - 1)) + self.rect.left, (j*(cellSize.height - 1)) + self.rect.top), size = cellSize)
-				self.cellsToDraw.append(self.cells[i][j])
+				self.cellsToRedraw.append(self.cells[i][j])
 
 		# Create each cell's neighbors list
 		self.createCellNeighbors()
@@ -41,7 +41,7 @@ class Grid():
 		updateList = []
 		
 		# Iterate through cells that need to be redrawn
-		for cell in self.cellsToDraw:
+		for cell in self.cellsToRedraw:
 			if cell.alive:
 				# If it's alive, fill a solid black rectangle
 				surface.fill(pygame.Color("black"), cell)
@@ -54,7 +54,7 @@ class Grid():
 			updateList.append(cell)
 		
 		# Clear list of cells to be redrawn
-		self.cellsToDraw.clear()
+		self.cellsToRedraw.clear()
 		
 		# Return list of rects to be updated on surface
 		return updateList
@@ -94,7 +94,7 @@ class Grid():
 				for cell in row:
 					if cell.collidepoint(pos):
 						cell.alive = not(cell.alive)
-						self.cellsToDraw.append(cell)
+						self.cellsToRedraw.append(cell)
 						return True
 		return False
 	
@@ -127,7 +127,7 @@ class Grid():
 					newArray[i][j] = Cell(Position((i*(self.cells[0][0].width - 1)) + self.rect.left, (j*(self.cells[0][0].height - 1)) + self.rect.top))
 				
 				# New cell needs to be redrawn
-				self.cellsToDraw.append(newArray[i][j])
+				self.cellsToRedraw.append(newArray[i][j])
 		
 		self.cells = newArray
 		self.createCellNeighbors()

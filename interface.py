@@ -44,7 +44,7 @@ class Interface():
 		pygame.key.set_repeat(500,75)
 		
 		# Create the initial grid
-		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))#, cellSize = Dimensions(4,4))
+		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
 		
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),

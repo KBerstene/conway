@@ -3,6 +3,10 @@
 def calc_status(grid, interface):
 	# Declare variables
 	totalAliveNeighbors = 0
+<<<<<<< HEAD
+=======
+	populationLimit = 2
+>>>>>>> Added control individual redraw.  Most redrawing takes no time at all now.  Huge grids still take a long time to draw, but I don't know how much more can be optimized.
 	cells = grid.cells
 	gridLength = len(cells)
 	gridHeight = len(cells[0])
@@ -37,4 +41,9 @@ def calc_status(grid, interface):
 		for y in range(gridHeight):
 			if cells[x][y].alive != tempGrid[x][y]:
 				cells[x][y].alive = tempGrid[x][y]
+<<<<<<< HEAD
 				grid.cellsToDraw.append(cells[x][y])
+=======
+				grid.cellsToRedraw.append(cells[x][y])
+	  
+>>>>>>> Added control individual redraw.  Most redrawing takes no time at all now.  Huge grids still take a long time to draw, but I don't know how much more can be optimized.

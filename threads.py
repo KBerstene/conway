@@ -2,7 +2,7 @@
 
 from threading import Thread
 from algorithms import calc_status
-from time import sleep
+from time import sleep,time
 
 # Create thread class for calculation loop
 class CalcThread(Thread):
@@ -19,4 +19,7 @@ class CalcThread(Thread):
 				sleep(1.0/self.speed)
 
 	def calc(self):
-		calc_status(self.interface.grid.cells)
+		start = time()
+		calc_status(self.interface.grid)
+		end = time()
+		print ("Calculations: " + str((end - start)*1000) + "ms")

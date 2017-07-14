@@ -6,14 +6,14 @@ from namedtuples import *
 
 class Grid():
 	# Constructor
-	def __init__(self, dimensions, location):
+	def __init__(self, dimensions, location, cellSize = Dimensions(21,21)):
 		# Create surface and static rect
 		self.surface = pygame.Surface(dimensions)
 		self.rect = self.surface.get_rect(left=location.left, top=location.top)
 		
 		# Calculate size of grid
-		self.gridWidth = math.ceil((dimensions.width - 1) / 20)
-		self.gridHeight = math.ceil((dimensions.height - 1) / 20)
+		self.gridWidth = math.ceil((dimensions.width - 1) / (cellSize.width - 1))
+		self.gridHeight = math.ceil((dimensions.height - 1) / (cellSize.height - 1))
 	
 		# Create a array of cells
 		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
@@ -21,7 +21,7 @@ class Grid():
 		# Set each square's position
 		for i in range(self.gridWidth):
 			for j in range(self.gridHeight):
-				self.cells[i][j] = Cell(Position((i*20) + self.rect.left, (j*20) + self.rect.top))
+				self.cells[i][j] = Cell(Position((i*(cellSize.width - 1)) + self.rect.left, (j*(cellSize.height - 1)) + self.rect.top), size = cellSize)
 
 		# Create each cell's neighbors list
 		self.createCellNeighbors()
@@ -76,8 +76,8 @@ class Grid():
 		self.rect = self.surface.get_rect(left=position.left, top=position.top)
 		
 		# Recalculate size of grid
-		self.gridWidth = math.ceil((size.width - 1) / 20)
-		self.gridHeight = math.ceil((size.height - 1) / 20)
+		self.gridWidth = math.ceil((size.width - 1) / (self.cells[0][0].width - 1))
+		self.gridHeight = math.ceil((size.height - 1) / (self.cells[0][0].height - 1))
 		
 		# Create array of new size
 		newArray = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
@@ -88,7 +88,7 @@ class Grid():
 				try:
 					newArray[i][j] = self.cells[i][j]
 				except (IndexError):
-					newArray[i][j] = Cell(Position((i*20) + self.rect.left, (j*20) + self.rect.top))
+					newArray[i][j] = Cell(Position((i*(self.cells[0][0].width - 1)) + self.rect.left, (j*(self.cells[0][0].height - 1)) + self.rect.top))
 		
 		self.cells = newArray
 		self.createCellNeighbors()

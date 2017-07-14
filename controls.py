@@ -20,26 +20,43 @@ class Controls():
 		# Link interface
 		self.interface = interface
 		
+		# Create list for drawing
+		self.controlsToRedraw = []
+		
 		# Create buttons and labels
 		self.controls = []
 		self.populateItems()
 	
 	def populateItems(self):
+		# Add controls
+			# Start Button
 		self.addControl([ RectWithText(text = "Start", font = self.fontPath, click = lambda:self.interface.pause()) ])
+			# Reset Button
 		self.addControl([ RectWithText(text = "Reset", font = self.fontPath, click = lambda:self.interface.reset()) ])
+			# Speed Label
 		self.addControl([ Label(text = "Speed", font = self.fontPath, size = 16) ])
+			# Speed controls and display
 		self.addControl([ TriButton(flip = True, click = lambda:self.interface.speedDown()), RectWithText(text = "2", size = Dimensions(61, 31), font = self.fontPath), TriButton(click = lambda:self.interface.speedUp()) ])
+			# Step forward
 		self.addControl([ Label(text = "Step Forward", font = self.fontPath, size = 18), TriButton(click = lambda:self.interface.stepForward()) ])
-		self.addControlPadding() # Fill the rest of the control panel with white
+			# Fill the rest of the control panel with white
+		self.addControlPadding()
 		
+		# Point to some static controls that need to get updated
 		self.simStatusDisplay = self.controls[0].objects[0]
 		self.speedDisplay = self.controls[3].objects[1]
+		# Add wrapper attribute so they can be flagged for redrawing
+		self.simStatusDisplay.wrapper = self.controls[0]
+		self.speedDisplay.wrapper = self.controls[3]
 	
 	def addControl(self, objectList):
 		if (len(self.controls) == 0):
 			self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, objectList))
 		else:
 			self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, objectList))
+		
+		# Add to list for initial draw
+		self.controlsToRedraw.append(self.controls[-1])
 			
 	def addControlPadding(self):
 		# The bottom of the last object is the top of the final padding
@@ -50,27 +67,39 @@ class Controls():
 		
 		paddingRect = Rectangle((left, top), (width, height))
 		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
+		
+		# Add to list for initial draw
+		self.controlsToRedraw.append(self.controls[-1])
 	
 	def draw(self, surface):
 		# Set list of rects that will be updated and returned
 		updateList = []
 		
 		# Draw control items
-		for item in self.controls:
+		for item in self.controlsToRedraw:
 			item.draw(surface)
 			updateList.append(item.get_rect())
+			
+		# Clear list of drawn items
+		self.controlsToRedraw.clear()
 		
 		# Return list of rects to be updated on surface
 		return updateList
 	
 	def updateStatusDisplay(self, simRunning):
 		if simRunning:
-			self.controls[0].objects[0].setText("Pause")
+			self.simStatusDisplay.setText("Pause")
 		else:
-			self.controls[0].objects[0].setText("Start")
+			self.simStatusDisplay.setText("Start")
+		
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.simStatusDisplay.wrapper)
 	
 	def updateSpeedDisplay(self, speed):
 		self.speedDisplay.setText(str(speed))
+		
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.speedDisplay.wrapper)
 		
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):

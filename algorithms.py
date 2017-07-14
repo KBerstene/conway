@@ -3,7 +3,7 @@
 def calc_status(grid):
 	# Variables
 	totalAliveNeighbors = 0
-	populationLimit = 3
+	populationLimit = 2
 	cells = grid.cells
 	gridLength = len(cells)
 	gridHeight = len(cells[0])
@@ -37,5 +37,5 @@ def calc_status(grid):
 		for y in range(gridHeight):
 			if cells[x][y].alive != tempGrid[x][y]:
 				cells[x][y].alive = tempGrid[x][y]
-				grid.cellsToDraw.append(cells[x][y])
+				grid.cellsToRedraw.append(cells[x][y])
 	  

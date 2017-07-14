@@ -58,7 +58,7 @@ class Interface():
 		if not self.processEvents():
 			return False
 		
-		# Draw objects
+		# Get list of objects to update
 		updates = self.draw()
 		
 		# Update window
@@ -118,16 +118,16 @@ class Interface():
 	def draw(self):
 		# Set list of rects that will be updated and returned
 		updateList = []
-	
+		
 		# Draw grid
 		updateList.extend(self.grid.draw(self.window))
-
+		
 		# Draw control interface
 		updateList.extend(self.controls.draw(self.window))
-				
+		
 		# Return list of rects to be updated
 		return updateList
-		
+
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
 		self.calcThread.__init__(self)

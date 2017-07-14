@@ -11,7 +11,7 @@ def calc_status(grid):
 	# Create array of new alive/dead stats
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
 	
-	#1337 maths
+	# Iterate through cells to see what needs to be changed
 	for x in range(gridLength):
 		for y in range(gridHeight):
 			totalAliveNeighbors = 0

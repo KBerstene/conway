@@ -10,7 +10,6 @@ class Grid():
 		# Create surface and static rect
 		self.surface = pygame.Surface(dimensions)
 		self.rect = self.surface.get_rect(left=location.left, top=location.top)
-		self.surface.fill(pygame.Color("white"))
 		
 		# Calculate size of grid
 		self.gridWidth = math.ceil((dimensions.width - 1) / (cellSize.width - 1))
@@ -32,11 +31,6 @@ class Grid():
 		self.createCellNeighbors()
 		
 	def draw(self, surface):
-		# Iterate through grid and print white square as dead and black square as alive
-		# for row in self.cells:
-			# for cell in row:
-				# pygame.draw.rect(surface, pygame.Color("black"), cell, not(cell.alive))
-		
 		# Set list of rects that will be updated and returned
 		updateList = []
 		

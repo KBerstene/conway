@@ -46,7 +46,7 @@ class Interface():
 		if not self.processEvents():
 			return False
 		
-		# Draw objects
+		# Get list of objects to update
 		updates = self.draw()
 		
 		# Update window
@@ -90,16 +90,16 @@ class Interface():
 	def draw(self):
 		# Set list of rects that will be updated and returned
 		updateList = []
-	
+		
 		# Draw grid
 		updateList.extend(self.grid.draw(self.window))
-
+		
 		# Draw control interface
 		updateList.extend(self.controls.draw(self.window))
-				
+		
 		# Return list of rects to be updated
 		return updateList
-		
+	
 	def resize(self, size):
 		# Resize window
 		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)

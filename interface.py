@@ -16,6 +16,11 @@ class Interface():
 		self.simRunning = False
 		self.calcThread = calcThread
 			# Section sizes
+		# Control width is actually a bit flexible now.
+		# The value below is the max value it will reach.
+		# The minimum value it will reach is
+		# (self.control_width - cell size + 1)
+		# so large cells can squish it a bit.
 		self.control_width = 200
 		
 		# Initialize pygame window
@@ -115,7 +120,7 @@ class Interface():
 			self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
 		
 		# Resize controls
-		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
+		self.controls.resize(Dimensions(self.window.get_rect().width - self.grid.rect.width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
 	
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)

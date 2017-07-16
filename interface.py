@@ -16,6 +16,11 @@ class Interface():
 		self.simRunning = False
 		self.calcThread = calcThread
 			# Section sizes
+		# Control width is actually a bit flexible now.
+		# The value below is the max value it will reach.
+		# The minimum value it will reach is
+		# (self.control_width - cell size + 1)
+		# so large cells can squish it a bit.
 		self.control_width = 200
 			# Key presses
 		self.L_SHIFT = 1

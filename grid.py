@@ -7,13 +7,14 @@ from namedtuples import *
 class Grid():
 	# Constructor
 	def __init__(self, dimensions, location, cellSize = Dimensions(21,21)):
-		# Create surface and static rect
-		self.surface = pygame.Surface(dimensions)
-		self.rect = self.surface.get_rect(left=location.left, top=location.top)
-		
 		# Calculate size of grid
-		self.gridWidth = math.ceil((dimensions.width - 1) / (cellSize.width - 1))
-		self.gridHeight = math.ceil((dimensions.height - 1) / (cellSize.height - 1))
+		self.cellSize = cellSize
+		self.gridWidth = math.ceil((dimensions.width - 1) / (self.cellSize.width - 1))
+		self.gridHeight = math.ceil((dimensions.height - 1) / (self.cellSize.height - 1))
+		
+		# Create surface and static rect
+		self.surface = pygame.Surface(((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
+		self.rect = self.surface.get_rect(left=location.left, top=location.top)
 		
 		# Create list of cells that need to be drawn
 		self.cellsToRedraw = []
@@ -24,7 +25,7 @@ class Grid():
 		# Set each square's position
 		for i in range(self.gridWidth):
 			for j in range(self.gridHeight):
-				self.cells[i][j] = Cell(Position((i*(cellSize.width - 1)) + self.rect.left, (j*(cellSize.height - 1)) + self.rect.top), size = cellSize)
+				self.cells[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.rect.left, (j*(self.cellSize.height - 1)) + self.rect.top), size = self.cellSize)
 				self.cellsToRedraw.append(self.cells[i][j])
 
 		# Create each cell's neighbors list
@@ -101,13 +102,14 @@ class Grid():
 		return None
 	
 	def resize(self, size, position):
-		# Resize surface
-		self.surface = pygame.transform.scale(self.surface, size)
-		self.rect = self.surface.get_rect(left=position.left, top=position.top)
-		
 		# Recalculate size of grid
-		self.gridWidth = math.ceil((size.width - 1) / (self.cells[0][0].width - 1))
-		self.gridHeight = math.ceil((size.height - 1) / (self.cells[0][0].height - 1))
+		self.gridWidth = math.ceil((size.width - 1) / (self.cellSize.width - 1))
+		self.gridHeight = math.ceil((size.height - 1) / (self.cellSize.height - 1))
+		
+		# Resize surface
+		self.surface = pygame.transform.scale(self.surface, ((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
+		self.rect = self.surface.get_rect(left=position.left, top=position.top)
+		print((self.gridWidth * self.cellSize.width,self.gridHeight * self.cellSize.height))
 		
 		# Create array of new size
 		newArray = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]

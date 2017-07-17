@@ -111,11 +111,8 @@ class Interface():
 		
 		# Resize grid
 		if (self.window.get_rect().width < self.control_width):
-			# Grid size is less than zero, so set it to 2x2 pixels instead
-			# (which should create a single cell).
-			# It will get covered by the controls, anyway.
-			# If grid is 0x0 and the calcThread starts, it will crash
-			self.grid.resize(Dimensions(2, 2), Position(0, 0))
+			# Grid size is less than zero, so set it to 0x0 pixels instead
+			self.grid.resize(Dimensions(0, 0), Position(0, 0))
 		else:
 			self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
 		

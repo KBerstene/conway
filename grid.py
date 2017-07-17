@@ -119,7 +119,7 @@ class Grid():
 				try:
 					newArray[i][j] = self.cells[i][j]
 				except (IndexError):
-					newArray[i][j] = Cell(Position((i*(self.cells[0][0].width - 1)) + self.rect.left, (j*(self.cells[0][0].height - 1)) + self.rect.top))
+					newArray[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.rect.left, (j*(self.cellSize.height - 1)) + self.rect.top))
 				
 				# New cell needs to be redrawn
 				self.cellsToRedraw.append(newArray[i][j])

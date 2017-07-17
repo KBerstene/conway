@@ -4,9 +4,16 @@ def calc_status(grid, interface):
 	# Declare variables
 	totalAliveNeighbors = 0
 	cells = grid.cells
-	gridLength = len(cells)
-	gridHeight = len(cells[0])
 
+	try:
+		gridLength = len(cells)
+		gridHeight = len(cells[0])
+	except IndexError:
+		# Grid length or height is 0
+		# because screen size is too small
+		# Don't do any calculations
+		return
+	
 	# Create array of new alive/dead stats
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
 	

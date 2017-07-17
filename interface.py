@@ -158,10 +158,14 @@ class Interface():
 		
 		if cell != None:
 			# Calculate where the cell should be under the mouse after resizing
+				# Find position of cursor relative to the cell (should be from 0 to cell width)
 			relativePos = Position(pos[0] - cell.left, pos[1] - cell.top)
+				# Find the new size of the cell
 			newSize = Dimensions(cell.width + sizeChange, cell.height + sizeChange)
-			sizeRatio = Dimensions(newSize.width/cell.width, newSize.height/cell.height)
-			newPos = Position(pos[0] - (sizeRatio.width * relativePos.left), pos[1] - (sizeRatio.height * relativePos.top))
+				# Find the ratio between the relative pos and the cell size
+			posRatio = Position(relativePos.left/cell.width, relativePos.top/cell.height)
+				# Calculate the new position of the cell.
+			newPos = Position(cell.left - (posRatio.left*sizeChange), cell.top - (posRatio.top*sizeChange))
 			
 			# Resize and move
 			cell.resize(newSize)

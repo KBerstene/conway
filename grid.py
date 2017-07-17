@@ -11,6 +11,11 @@ class Grid():
 		self.cellSize = cellSize
 		self.gridWidth = math.ceil((dimensions.width - 1) / (self.cellSize.width - 1))
 		self.gridHeight = math.ceil((dimensions.height - 1) / (self.cellSize.height - 1))
+
+		# Create constants
+		self.cellSize = cellSize
+		self.minSize = Dimensions(5,5)
+		self.maxSize = Dimensions(100, 100)
 		
 		# Create surface and static rect
 		self.surface = pygame.Surface(((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
@@ -100,6 +105,18 @@ class Grid():
 					if cell.collidepoint(pos):
 						return cell
 		return None
+	
+	def getCellIndex(self, cell):
+		for row in self.cells:
+			try:
+				# If the cell isn't in this row, it will drop into the except block
+				# Once it's found, it will index the row and break out of the loop
+				y = row.index(cell)
+				x = self.cells.index(row)
+				break
+			except:
+				pass
+		return Coordinates(x, y)
 	
 	def resize(self, size, position):
 		# Recalculate size of grid

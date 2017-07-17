@@ -188,23 +188,56 @@ class Interface():
 		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
 	
 	def zoomIn(self, pos, sizeChange = 2):
-		# Get the cell that was zoomed in on
-		cell = self.grid.getCell(pos)
+		# Find the new size of the cell
+		newSize = Dimensions(self.grid.cellSize.width + sizeChange, self.grid.cellSize.height + sizeChange)
 		
-		if cell != None:
-			# Calculate where the cell should be under the mouse after resizing
-				# Find position of cursor relative to the cell (should be from 0 to cell width)
-			relativePos = Position(pos[0] - cell.left, pos[1] - cell.top)
-				# Find the new size of the cell
-			newSize = Dimensions(cell.width + sizeChange, cell.height + sizeChange)
-				# Find the ratio between the relative pos and the cell size
-			posRatio = Position(relativePos.left/cell.width, relativePos.top/cell.height)
-				# Calculate the new position of the cell.
-			newPos = Position(cell.left - (posRatio.left*sizeChange), cell.top - (posRatio.top*sizeChange))
+		# Make sure we're not going outside of size limits
+		if (newSize <= self.grid.minSize) or (newSize >= self.grid.maxSize):
+			return
+		
+		# Get the cell that was zoomed in on
+		zoomedCell = self.grid.getCell(pos)
+		
+		# If no cell was zoomed in on, quit now
+		if zoomedCell == None:
+			return
+		
+		# Calculate where the cell should be under the mouse after resizing
+			# Find position of cursor relative to the cell (should be from 0 to cell width)
+		relativePos = Position(pos[0] - zoomedCell.left, pos[1] - zoomedCell.top)
+			# Find the ratio between the relative pos and the cell size
+		posRatio = Position(relativePos.left/zoomedCell.width, relativePos.top/zoomedCell.height)
+			# Calculate the new position of the cell.
+		newPos = Position(zoomedCell.left - (posRatio.left*sizeChange), zoomedCell.top - (posRatio.top*sizeChange))
 			
-			# Resize and move
-			cell.resize(newSize)
-			cell.move(newPos)
+		# Resize and move first cell
+		# zoomedCell.resize(newSize)
+		# zoomedCell.move(newPos)
+		
+		# Now we have a size for the cells and a grid location to start on
+		# Find the index of the cell that was zoomed on
+		index = self.grid.getCellIndex(zoomedCell) # Returns a tuple with the x/y position in the cell array
+		
+		# Using the index, we can calculate how far away the cells should be from the zoomed cell.
+		# While we're iterating through, we also resize each cell.
+		for x in range(len(self.grid.cells)):
+			for y in range(len(self.grid.cells[x])):
+				self.grid.cells[x][y].resize(newSize)
+				self.grid.cells[x][y].move(Position(newPos.left - ((newSize.width - 1)*(index.x - x)), newPos.top - ((newSize.height - 1)*(index.y - y))))
+				
+				# This is supposed to fix a minor cell-wall-width variation I only see in the top row or left column
+				# 2017-07-17 Kevin T. Berstene
+				if self.grid.cells[x][y].x <= 0:
+					self.grid.cells[x][y].move(Position(self.grid.cells[x][y].x - 1, self.grid.cells[x][y].y))
+				if self.grid.cells[x][y].y <= 0:
+					self.grid.cells[x][y].move(Position(self.grid.cells[x][y].x, self.grid.cells[x][y].y - 1))
+		
+		####################################
+		# AFTER ZOOM, ADD OR REMOVE ADDITIONAL CELLS
+		####################################
+		
+		# Set new grid cellSize
+		self.grid.cellSize = newSize
 	
 	def zoomOut(self, pos, sizeChange = 2):
 		self.zoomIn(pos, 0 - sizeChange)

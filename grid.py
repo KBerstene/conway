@@ -7,6 +7,11 @@ from namedtuples import *
 class Grid():
 	# Constructor
 	def __init__(self, dimensions, location, cellSize = Dimensions(21,21)):
+		# Create constants
+		self.cellSize = cellSize
+		self.minSize = Dimensions(5,5)
+		self.maxSize = Dimensions(100, 100)
+		
 		# Create surface and static rect
 		self.surface = pygame.Surface(dimensions)
 		self.rect = self.surface.get_rect(left=location.left, top=location.top)
@@ -77,6 +82,18 @@ class Grid():
 					if cell.collidepoint(pos):
 						return cell
 		return None
+	
+	def getCellIndex(self, cell):
+		for row in self.cells:
+			try:
+				# If the cell isn't in this row, it will drop into the except block
+				# Once it's found, it will index the row and break out of the loop
+				y = row.index(cell)
+				x = self.cells.index(row)
+				break
+			except:
+				pass
+		return Coordinates(x, y)
 	
 	def resize(self, size, position):
 		# Resize surface

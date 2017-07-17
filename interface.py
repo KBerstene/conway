@@ -26,9 +26,12 @@ class Interface():
 		# Create clock to limit FPS
 		self.fpsClock = pygame.time.Clock()
 
+		# Enable key hold repeating and set limits
+		pygame.key.set_repeat(500,75)
+		
 		# Create the initial grid
 		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
-
+		
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
 								Position(self.grid.rect.width, 0), self)
@@ -73,7 +76,16 @@ class Interface():
 				else:
 					pass
 			elif event.type == KEYDOWN:
-				pass
+				if event.key == K_LEFT:
+					self.speedDown()
+					self.controls.updateSpeedDisplay(self.calcThread.speed)
+				elif event.key == K_RIGHT:
+					self.speedUp()
+					self.controls.updateSpeedDisplay(self.calcThread.speed)
+				elif event.key == K_SPACE:
+					self.pause()
+				else:
+					pass
 			elif event.type == VIDEORESIZE:
 				self.resize(event.dict['size'])
 			else:
@@ -89,6 +101,23 @@ class Interface():
 
 		# Draw control interface
 		self.controls.draw(self.window)
+
+	def resize(self, size):
+		# Resize window
+		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
+		
+		# Resize grid
+		if (self.window.get_rect().width < self.control_width):
+			# Grid size is less than zero, so set it to 2x2 pixels instead
+			# (which should create a single cell).
+			# It will get covered by the controls, anyway.
+			# If grid is 0x0 and the calcThread starts, it will crash
+			self.grid.resize(Dimensions(2, 2), Position(0, 0))
+		else:
+			self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
+		
+		# Resize controls
+		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
 	
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
@@ -99,24 +128,22 @@ class Interface():
 	#################################
 	def pause(self):
 		self.simRunning = not(self.simRunning)
-		return self.simRunning
+		self.controls.updateStatusDisplay(self.simRunning)
 
 	def speedUp(self):
-		if (self.calcThread.speed < 9):
-			self.calcThread.speed += 1
-		return self.calcThread.speed
+		self.calcThread.speed += 1
+		self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def speedDown(self):
 		if (self.calcThread.speed > 1):
 			self.calcThread.speed -= 1
-		return self.calcThread.speed
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def stepForward(self):
 		if self.simRunning:
 			self.pause()
 		self.calcThread.calc()
-		return self.simRunning
-	
+
 	################################
 	# Visual size manipulation     #
 	################################
@@ -142,4 +169,3 @@ class Interface():
 	
 	def zoomOut(self, pos, sizeChange = -2):
 		self.zoomIn(pos, sizeChange)
-	

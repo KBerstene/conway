@@ -19,4 +19,4 @@ class CalcThread(Thread):
 				sleep(1.0/self.speed)
 
 	def calc(self):
-		calc_status(self.interface.grid)
+		calc_status(self.interface.grid.cells)

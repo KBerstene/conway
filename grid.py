@@ -109,7 +109,6 @@ class Grid():
 		# Resize surface
 		self.surface = pygame.transform.scale(self.surface, ((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
 		self.rect = self.surface.get_rect(left=position.left, top=position.top)
-		print((self.gridWidth * self.cellSize.width,self.gridHeight * self.cellSize.height))
 		
 		# Create array of new size
 		newArray = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]

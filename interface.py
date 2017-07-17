@@ -171,5 +171,5 @@ class Interface():
 			cell.resize(newSize)
 			cell.move(newPos)
 	
-	def zoomOut(self, pos, sizeChange = -2):
-		self.zoomIn(pos, sizeChange)
+	def zoomOut(self, pos, sizeChange = 2):
+		self.zoomIn(pos, 0 - sizeChange)

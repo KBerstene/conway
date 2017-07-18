@@ -37,6 +37,32 @@ class Grid():
 			for cell in row:
 				pygame.draw.rect(surface, pygame.Color("black"), cell, not(cell.alive))
 	
+	def addRow(self, prepend = False):
+		pass
+	
+	def addColumn(self, prepend = False):
+		if prepend:
+			pass
+		else:
+			# Grid gets one wider
+			self.gridWidth = self.gridWidth + 1
+			
+			# Create new column
+			# Add new column onto end of cell array
+			self.cells.append([Cell() for x in range(self.gridHeight)])
+			
+			# Set position for new cells in column
+			i = self.gridWidth - 1
+			for j in range(self.gridHeight):
+				self.cells[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.rect.left, (j*(self.cellSize.height - 1)) + self.rect.top), size = self.cellSize)
+	
+	def removeRow(self, rowIndex):
+		for column in self.cells:
+			column.pop(rowIndex)
+	
+	def removeColumn(self, columnIndex):
+		self.cells.pop(columnIndex)
+	
 	def createCellNeighbors(self):
 		# Create neighbors list for each cell
 		for i in range(self.gridWidth):

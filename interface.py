@@ -175,10 +175,6 @@ class Interface():
 			# Calculate the new position of the cell.
 		newPos = Position(zoomedCell.left - (posRatio.left*sizeChange), zoomedCell.top - (posRatio.top*sizeChange))
 			
-		# Resize and move first cell
-		# zoomedCell.resize(newSize)
-		# zoomedCell.move(newPos)
-		
 		# Now we have a size for the cells and a grid location to start on
 		# Find the index of the cell that was zoomed on
 		index = self.grid.getCellIndex(zoomedCell) # Returns a tuple with the x/y position in the cell array

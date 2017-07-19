@@ -38,15 +38,34 @@ class Grid():
 				pygame.draw.rect(surface, pygame.Color("black"), cell, not(cell.alive))
 	
 	def addRow(self, prepend = False):
-		pass
-	
-	def addColumn(self, prepend = False):
+		# Grid gets one taller
+		self.gridHeight = self.gridHeight + 1
+		
 		if prepend:
-			pass
+			# Add a cell into each column to form a new row
+			j = 0
+			for i in range(self.gridWidth):
+				self.cells[i].insert(0, Cell(Position(self.cells[i][j].left, self.cells[i][j].top - self.cellSize.height + 1), size = self.cellSize))
 		else:
-			# Grid gets one wider
-			self.gridWidth = self.gridWidth + 1
+			# Add a cell into each column to form a new row
+			j = self.gridHeight - 2
+			for i in range(self.gridWidth):
+				self.cells[i].append(Cell(Position(self.cells[i][j].left, self.cells[i][j].top + self.cellSize.height - 1), size = self.cellSize))
+				
+	def addColumn(self, prepend = False):
+		# Grid gets one wider
+		self.gridWidth = self.gridWidth + 1
+		
+		if prepend:
+			# Create new column
+			# Add new column onto end of cell array
+			self.cells.insert(0, [Cell() for x in range(self.gridHeight)])
 			
+			# Set position for new cells in column
+			i = 0
+			for j in range(self.gridHeight):
+				self.cells[i][j] = Cell(Position(self.cells[i+1][j].left - self.cellSize.width + 1, self.cells[i+1][j].top), size = self.cellSize)
+		else:
 			# Create new column
 			# Add new column onto end of cell array
 			self.cells.append([Cell() for x in range(self.gridHeight)])
@@ -54,14 +73,20 @@ class Grid():
 			# Set position for new cells in column
 			i = self.gridWidth - 1
 			for j in range(self.gridHeight):
-				self.cells[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.rect.left, (j*(self.cellSize.height - 1)) + self.rect.top), size = self.cellSize)
-	
+				self.cells[i][j] = Cell(Position(self.cells[i-1][j].left + self.cellSize.width - 1, self.cells[i-1][j].top), size = self.cellSize)
+
 	def removeRow(self, rowIndex):
 		for column in self.cells:
 			column.pop(rowIndex)
+		
+		# Grid gets one shorter
+		self.gridHeight = self.gridHeight - 1
 	
 	def removeColumn(self, columnIndex):
 		self.cells.pop(columnIndex)
+		
+		# Grid gets one thinner
+		self.gridWidth = self.gridWidth - 1
 	
 	def createCellNeighbors(self):
 		# Create neighbors list for each cell

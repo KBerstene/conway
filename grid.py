@@ -64,6 +64,52 @@ class Grid():
 			for cell in row:
 				self.cellsToRedraw.append(cell)
 	
+	def autoAddRemoveCells(self, size = None):
+		# I can't assign self attributes as a default parameter value,
+		# so if size isn't passed, assign the default value here.
+		if size == None:
+			size = Dimensions(self.rect.width, self.rect.height)
+	
+		################################################
+		# Add additional cells that have come onscreen #
+		################################################
+		
+		# Check to add top row
+		while self.cells[0][0].top > 0:
+			self.addRow(prepend = True)
+		
+		# Check to add bottom row
+		while self.cells[-1][-1].top + self.cellSize.height < size.height:
+			self.addRow(prepend = False)
+		
+		# Check to add left column
+		while self.cells[0][0].left > 0:
+			self.addColumn(prepend = True)
+		
+		# Check to add right column
+		while self.cells[-1][-1].left + self.cellSize.width < size.width:
+			self.addColumn(prepend = False)
+		
+		##########################################
+		# Remove cells that have moved offscreen #
+		##########################################
+		
+		# Check to remove top rows
+		while self.cells[0][0].top + self.cellSize.height < 0:
+			self.removeRow(0)
+		
+		# Check to remove bottom rows
+		while self.cells[-1][-1].top > size.height:
+			self.removeRow(-1)
+		
+		# Check to remove left columns
+		while self.cells[0][0].left + self.cellSize.width < 0:
+			self.removeColumn(0)
+		
+		# Check to remove right columns
+		while self.cells[-1][-1].left > size.width:
+			self.removeColumn(-1)
+	
 	def addRow(self, prepend = False):
 		# Grid gets one taller
 		self.gridHeight = self.gridHeight + 1
@@ -249,78 +295,8 @@ class Grid():
 		return Coordinates(x, y)
 	
 	def resize(self, size, position):
-		######################################
-		# OLD WAY
-		######################################
-		
-		# Recalculate size of grid
-		# self.gridWidth = math.ceil((size.width - 1) / (self.cellSize.width - 1))
-		# self.gridHeight = math.ceil((size.height - 1) / (self.cellSize.height - 1))
-		
-		# Resize surface
-		# self.surface = pygame.transform.scale(self.surface, ((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
-		# self.rect = self.surface.get_rect(left=position.left, top=position.top)
-		
-		# Create array of new size
-		# newArray = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
-		
-		# Set each square's position
-		# for i in range(self.gridWidth):
-			# for j in range(self.gridHeight):
-				# try:
-					# newArray[i][j] = self.cells[i][j]
-				# except (IndexError):
-					# newArray[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.rect.left, (j*(self.cellSize.height - 1)) + self.rect.top), size = self.cellSize)
-				
-				# New cell needs to be redrawn
-				# self.cellsToRedraw.append(newArray[i][j])
-		
-		# self.cells = newArray
-		# self.createCellNeighbors()
-	
-		######################################
-		# NEW WAY
-		######################################
-		
-		################################################
-		# Add additional cells that have come onscreen #
-		################################################
-		
-		# Check to add top row
-		while self.cells[0][0].top > 0:
-			self.addRow(prepend = True)
-		
-		# Check to add bottom row
-		while self.cells[-1][-1].top + self.cellSize.height < size.height:
-			self.addRow(prepend = False)
-		
-		# Check to add left column
-		while self.cells[0][0].left > 0:
-			self.addColumn(prepend = True)
-		
-		# Check to add right column
-		while self.cells[-1][-1].left + self.cellSize.width < size.width:
-			self.addColumn(prepend = False)
-		
-		##########################################
-		# Remove cells that have moved offscreen #
-		##########################################
-		
-		# Check to remove top rows
-		while self.cells[0][0].top + self.cellSize.height < 0:
-			self.removeRow(0)
-		
-		# Check to remove bottom rows
-		while self.cells[-1][-1].top > size.height:
-			self.removeRow(-1)
-		
-		# Check to remove left columns
-		while self.cells[0][0].left + self.cellSize.width < 0:
-			self.removeColumn(0)
-		
-		# Check to remove right columns
-		while self.cells[-1][-1].left > size.width:
-			self.removeColumn(-1)
+		# Add and remove cells that have moved on or off screen
+		self.autoAddRemoveCells(size)
 	
 		# Resize surface
 		self.surface = pygame.transform.scale(self.surface, ((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))

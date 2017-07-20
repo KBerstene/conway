@@ -248,45 +248,11 @@ class Interface():
 		# so any added cells will be of the right size
 		self.grid.cellSize = newSize
 		
-		################################################
-		# Add additional cells that have come onscreen #
-		################################################
+		########################################################
+		# Add or remove cells that have moved on or off screen #
+		########################################################
 		
-		# Check to add top row
-		while self.grid.cells[0][0].top > 0:
-			self.grid.addRow(prepend = True)
-		
-		# Check to add bottom row
-		while self.grid.cells[-1][-1].top + self.grid.cellSize.height < self.grid.rect.height:
-			self.grid.addRow(prepend = False)
-		
-		# Check to add left column
-		while self.grid.cells[0][0].left > 0:
-			self.grid.addColumn(prepend = True)
-		
-		# Check to add right column
-		while self.grid.cells[-1][-1].left + self.grid.cellSize.width < self.grid.rect.width:
-			self.grid.addColumn(prepend = False)
-		
-		##########################################
-		# Remove cells that have moved offscreen #
-		##########################################
-		
-		# Check to remove top rows
-		while self.grid.cells[0][0].top + self.grid.cellSize.height < 0:
-			self.grid.removeRow(0)
-		
-		# Check to remove bottom rows
-		while self.grid.cells[-1][-1].top > self.grid.rect.height:
-			self.grid.removeRow(-1)
-		
-		# Check to remove left columns
-		while self.grid.cells[0][0].left + self.grid.cellSize.width < 0:
-			self.grid.removeColumn(0)
-		
-		# Check to remove right columns
-		while self.grid.cells[-1][-1].left > self.grid.rect.width:
-			self.grid.removeColumn(-1)
+		self.grid.autoAddRemoveCells()
 	
 		#########################################
 		# Schedule entire grid for redrawing    #

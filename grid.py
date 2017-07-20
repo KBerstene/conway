@@ -59,6 +59,11 @@ class Grid():
 		# Return list of rects to be updated on surface
 		return updateList
 	
+	def redrawAll(self):
+		for row in self.cells:
+			for cell in row:
+				self.cellsToRedraw.append(cell)
+	
 	def addRow(self, prepend = False):
 		# Grid gets one taller
 		self.gridHeight = self.gridHeight + 1

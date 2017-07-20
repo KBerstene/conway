@@ -288,6 +288,12 @@ class Interface():
 		while self.grid.cells[-1][-1].left > self.grid.rect.width:
 			self.grid.removeColumn(-1)
 	
+		#########################################
+		# Schedule entire grid for redrawing    #
+		#########################################
+		
+		self.grid.redrawAll()
+	
 	def zoomOut(self, pos, sizeChange = 2):
 		# Do everything zoom out does,
 		# but with negative sizeChange

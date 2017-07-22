@@ -12,7 +12,6 @@ class CalcThread(Thread):
 		self.interface = interface
 		self.speed = 2
 		
-		self.populationLimit = 4
 	def run(self):
 		while (True):
 			if self.interface.simRunning:
@@ -20,4 +19,4 @@ class CalcThread(Thread):
 				sleep(1.0/self.speed)
 
 	def calc(self):
-		calc_status(self.interface.grid.cells, self.populationLimit)
+		calc_status(self.interface.grid.cells, self.interface)

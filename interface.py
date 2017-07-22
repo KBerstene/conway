@@ -17,6 +17,18 @@ class Interface():
 		self.calcThread = calcThread
 			# Section sizes
 		self.control_width = 200
+			# Key presses
+		self.L_SHIFT = 1
+		self.R_SHIFT = 2
+		self.L_CTRL = 64
+		self.R_CTRL = 128
+		self.L_ALT = 256
+		self.R_ALT = 512
+	
+		# Declare variables
+		self.populationLimit = 3
+		self.populationMin = 2
+		self.generation = 0
 		
 		# Initialize pygame window
 		pygame.init()
@@ -60,7 +72,7 @@ class Interface():
 	def processEvents(self):
 		click_pos=(-1,-1)
 
-		# Get pygame events to see if exit is called
+		# Get pygame events to see if/what key is pressed
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
@@ -70,14 +82,25 @@ class Interface():
 					self.controls.collidepoint(pygame.mouse.get_pos())
 					self.grid.collidepoint(pygame.mouse.get_pos())
 			elif event.type == KEYDOWN:
+				mods = pygame.key.get_mods()# Get modifier keys
 				if event.key == K_LEFT:
-					self.speedDown()
-					self.controls.updateSpeedDisplay(self.calcThread.speed)
+					if mods == self.L_SHIFT:
+						self.popLimitDown()
+					elif mods == self.L_CTRL:
+						self.popMinDown()
+					else:
+						self.speedDown()
 				elif event.key == K_RIGHT:
-					self.speedUp()
-					self.controls.updateSpeedDisplay(self.calcThread.speed)
+					if mods == self.L_SHIFT:
+						self.popLimitUp()
+					elif mods == self.L_CTRL:
+						self.popMinUp()
+					else:
+						self.speedUp()
 				elif event.key == K_SPACE:
 					self.pause()
+				elif event.key == K_RETURN:
+					self.stepForward()
 				else:
 					pass
 			elif event.type == VIDEORESIZE:
@@ -130,6 +153,26 @@ class Interface():
 		if (self.calcThread.speed > 1):
 			self.calcThread.speed -= 1
 			self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def popLimitUp(self):
+		if self.populationLimit < 8:
+			self.populationLimit += 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+	
+	def popLimitDown(self):
+		if self.populationLimit > 1:
+			self.populationLimit -= 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+			
+	def popMinUp(self):
+		if self.populationMin < 8:
+			self.populationMin += 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+			
+	def popMinDown(self):
+		if self.populationMin > 1:
+			self.populationMin -= 1
+			self.controls.updatePopMinDisplay(self.populationMin)
 	
 	def stepForward(self):
 		if self.simRunning:

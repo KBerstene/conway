@@ -15,7 +15,7 @@ class Grid():
 		self.gridWidth = math.ceil((dimensions.width - 1) / (cellSize.width - 1))
 		self.gridHeight = math.ceil((dimensions.height - 1) / (cellSize.height - 1))
 	
-		# Create a array of cells
+		# Create an array of cells
 		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
 		
 		# Set each square's position

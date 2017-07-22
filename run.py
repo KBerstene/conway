@@ -16,8 +16,13 @@ if __name__ == "__main__":
 	# Start the calc thread
 	calculations.start()
 	
-	# Run the interface updates
+	# Run the interface updates until told to quit
 	while (interface.update()):
 		pass
 		
+	# Wait for calc thread to quit
+	while calculations.isAlive():
+		pass
+	
+	# Interface and calc thread have both finished
 	exit()

@@ -61,6 +61,8 @@ class Interface():
 	def update(self):
 		# Process any mouse/keyboard events
 		if not self.processEvents():
+			# Tell calcThread to exit
+			self.calcThread.killswitch = True
 			return False
 		
 		# Get list of objects to update

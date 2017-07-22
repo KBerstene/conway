@@ -11,9 +11,10 @@ class CalcThread(Thread):
 		self.daemon = True
 		self.interface = interface
 		self.speed = 2
+		self.killswitch = False
 		
 	def run(self):
-		while (True):
+		while not self.killswitch:
 			if self.interface.simRunning:
 				self.calc()
 				sleep(1.0/self.speed)

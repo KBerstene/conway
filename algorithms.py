@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-def calc_status(grid, interface):
+def calc_status(interface):
 	# Declare variables
 	totalAliveNeighbors = 0
-	cells = grid.cells
+	cells = interface.grid.cells
 
 	try:
 		gridLength = len(cells)
@@ -44,4 +44,4 @@ def calc_status(grid, interface):
 		for y in range(gridHeight):
 			if cells[x][y].alive != tempGrid[x][y]:
 				cells[x][y].alive = tempGrid[x][y]
-				grid.cellsToRedraw.append(cells[x][y])
+				interface.grid.cellsToRedraw.append(cells[x][y])

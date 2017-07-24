@@ -33,7 +33,7 @@ class Controls():
 		self.addControl([ RectWithText(text = "Start", font = self.fontPath, click = lambda:self.interface.pause()) ])
 			# Step forward
 		self.addControl([ Label(text = "Step Forward", font = self.fontPath, size = 18), TriButton(click = lambda:self.interface.stepForward()) ])
-		self.addControl([ Label(text = "Generation = ", font = self.fontPath, size = 16), Label(text = "0", font = self.fontPath, size = 16) ])
+		self.addControl([ Label(text = "Generation = ", font = self.fontPath, size = 18), Label(text = "0", font = self.fontPath, size = 18) ])
 			# Speed Label
 		self.addControl([ Label(text = "Speed", font = self.fontPath, size = 16) ])
 			# Speed controls and display
@@ -51,11 +51,13 @@ class Controls():
 		
 		# Point to some static controls that need to get updated
 		self.simStatusDisplay = self.controls[0].objects[0]
+		self.generationDisplay = self.controls[2].objects[1]
 		self.speedDisplay = self.controls[4].objects[1]
 		self.popLimitDisplay = self.controls[6].objects[1]
 		self.popMinDisplay = self.controls[8].objects[1]
 		# Add wrapper attribute so they can be flagged for redrawing
 		self.simStatusDisplay.wrapper = self.controls[0]
+		self.generationDisplay.wrapper = self.controls[2]
 		self.speedDisplay.wrapper = self.controls[4]
 		self.popLimitDisplay.wrapper = self.controls[6]
 		self.popMinDisplay.wrapper = self.controls[8]
@@ -111,7 +113,13 @@ class Controls():
 
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.speedDisplay.wrapper)
-	
+		
+	def updateGenerationDisplay(self, generation):
+		self.generationDisplay.setText(str(generation))
+		
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.generationDisplay.wrapper)
+		
 	def updatePopLimitDisplay(self, poplimit):
 		self.popLimitDisplay.setText(str(poplimit))
 		
@@ -143,6 +151,7 @@ class Controls():
 		self.updateSpeedDisplay(self.interface.calcThread.speed)
 		self.updatePopLimitDisplay(self.interface.populationLimit)
 		self.updatePopMinDisplay(self.interface.populationMin)
+		self.updateGenerationDisplay(self.interface.generation)
 		
 
 # Wrapper class for all control objects
@@ -294,9 +303,18 @@ class Label(pygame.Surface):
 		self.top = pos.top
 		self.width = super().get_rect().width
 		self.height = super().get_rect().height
+		
+		self.fontPath = font
+		self.fontSize = size
+		self.text = text
+		
+	def setText(self, text):
+		self.text = text
+		self.textSurface = pygame.font.Font(self.fontPath, self.fontSize).render(text, 1, pygame.Color("black"))
 	
 	def draw(self, surface):
-		surface.blit(self, (self.left, self.top))
+		self.setText(self.text)
+		surface.blit(self.textSurface, (self.left, self.top))
 	
 	def collidepoint(self, *args, **kwargs):
 		pass

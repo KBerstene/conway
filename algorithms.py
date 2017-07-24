@@ -45,3 +45,7 @@ def calc_status(interface):
 			if cells[x][y].alive != tempGrid[x][y]:
 				cells[x][y].alive = tempGrid[x][y]
 				interface.grid.cellsToRedraw.append(cells[x][y])
+				
+	#Increase generation and update display
+	interface.generation += 1
+	interface.controls.updateGenerationDisplay(interface.generation)

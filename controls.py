@@ -56,7 +56,9 @@ class Controls():
 		self.popMinDisplay = self.controls[8].objects[1]
 		# Add wrapper attribute so they can be flagged for redrawing
 		self.simStatusDisplay.wrapper = self.controls[0]
-		self.speedDisplay.wrapper = self.controls[3]
+		self.speedDisplay.wrapper = self.controls[4]
+		self.popLimitDisplay.wrapper = self.controls[6]
+		self.popMinDisplay.wrapper = self.controls[8]
 	
 	def addControl(self, objectList):
 		if (len(self.controls) == 0):
@@ -113,8 +115,14 @@ class Controls():
 	def updatePopLimitDisplay(self, poplimit):
 		self.popLimitDisplay.setText(str(poplimit))
 		
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.popLimitDisplay.wrapper)
+		
 	def updatePopMinDisplay(self, popMin):
 		self.popMinDisplay.setText(str(popMin))
+		
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.popMinDisplay.wrapper)
 		
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):
@@ -131,7 +139,10 @@ class Controls():
 		# Regenerate control items
 		self.controls.clear()
 		self.populateItems()
+		self.updateStatusDisplay(self.interface.simRunning)
 		self.updateSpeedDisplay(self.interface.calcThread.speed)
+		self.updatePopLimitDisplay(self.interface.populationLimit)
+		self.updatePopMinDisplay(self.interface.populationMin)
 		
 
 # Wrapper class for all control objects

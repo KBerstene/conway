@@ -51,7 +51,7 @@ class Interface():
 		
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
-								Position(self.grid.rect.width, 0), self)
+								Position(self.grid.width, 0), self)
 
 
 	def setCalcThread(self,calcThread):
@@ -86,8 +86,10 @@ class Interface():
 				return False
 			elif event.type == MOUSEBUTTONDOWN:
 				if event.button == 1: # Left click
-					self.controls.collidepoint(pygame.mouse.get_pos())
-					self.grid.collidepoint(pygame.mouse.get_pos())
+					if self.controls.collidepoint(pygame.mouse.get_pos()):
+						pass
+					elif self.grid.collidepoint(pygame.mouse.get_pos()):
+						self.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
 				elif event.button == 4: # Scroll wheel up
 					self.zoomIn(pygame.mouse.get_pos()) # Zoom in
 				elif event.button == 5: # Scroll wheel down
@@ -187,7 +189,7 @@ class Interface():
 	def resize(self, size):
 		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
 		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
-		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
+		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.width, 0))
 	
 	def zoomIn(self, pos, sizeChange = 2):
 		##############################################

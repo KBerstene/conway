@@ -4,7 +4,7 @@ import pygame
 import math
 from namedtuples import *
 
-class Grid():
+class Grid(pygame.Rect):
 	# Constructor
 	def __init__(self, dimensions, location, cellSize = Dimensions(21,21)):
 		# Calculate size of grid
@@ -12,14 +12,13 @@ class Grid():
 		self.gridWidth = math.ceil((dimensions.width - 1) / (self.cellSize.width - 1))
 		self.gridHeight = math.ceil((dimensions.height - 1) / (self.cellSize.height - 1))
 
+		# Call Rect constructor
+		super().__init__(location.left, location.top, (self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1))
+		
 		# Create constants
 		self.cellSize = cellSize
 		self.minSize = Dimensions(5,5)
 		self.maxSize = Dimensions(100, 100)
-		
-		# Create surface and static rect
-		self.surface = pygame.Surface(((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
-		self.rect = self.surface.get_rect(left=location.left, top=location.top)
 		
 		# Create list of cells that need to be drawn
 		self.cellsToRedraw = []
@@ -30,7 +29,7 @@ class Grid():
 		# Set each square's position
 		for i in range(self.gridWidth):
 			for j in range(self.gridHeight):
-				self.cells[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.rect.left, (j*(self.cellSize.height - 1)) + self.rect.top), size = self.cellSize)
+				self.cells[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.left, (j*(self.cellSize.height - 1)) + self.top), size = self.cellSize)
 				self.cellsToRedraw.append(self.cells[i][j])
 
 		# Create each cell's neighbors list
@@ -68,7 +67,7 @@ class Grid():
 		# I can't assign self attributes as a default parameter value,
 		# so if size isn't passed, assign the default value here.
 		if size == None:
-			size = Dimensions(self.rect.width, self.rect.height)
+			size = Dimensions(self.width, self.height)
 	
 		################################################
 		# Add additional cells that have come onscreen #
@@ -262,19 +261,9 @@ class Grid():
 			# Bottom right
 			try: self.cells[i][index].neighbors.append(self.cells[i+1][index+1])
 			except: pass
-
-	def collidepoint(self, pos):
-		if self.rect.collidepoint(pos):
-			for row in self.cells:
-				for cell in row:
-					if cell.collidepoint(pos):
-						cell.alive = not(cell.alive)
-						self.cellsToRedraw.append(cell)
-						return True
-		return False
 	
 	def getCell(self, pos):
-		if self.rect.collidepoint(pos):
+		if self.collidepoint(pos):
 			for row in self.cells:
 				for cell in row:
 					if cell.collidepoint(pos):
@@ -294,13 +283,25 @@ class Grid():
 		
 		return Coordinates(x, y)
 	
-	def resize(self, size, position):
+	# Called when a cell is left-clicked on
+	def clickCell(self, cell):
+		# Flip cell's alive status
+		cell.alive = not cell.alive
+		
+		# Set cell for redrawing
+		self.cellsToRedraw.append(cell)
+		
+	def resize(self, size, location):
 		# Add and remove cells that have moved on or off screen
 		self.autoAddRemoveCells(size)
-	
-		# Resize surface
-		self.surface = pygame.transform.scale(self.surface, ((self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1)))
-		self.rect = self.surface.get_rect(left=position.left, top=position.top)
+		
+		self.gridWidth = math.ceil((size.width - 1) / (self.cellSize.width - 1))
+		self.gridHeight = math.ceil((size.height - 1) / (self.cellSize.height - 1))
+		
+		self.left=location.left
+		self.top=location.top
+		self.width=(self.gridWidth * (self.cellSize.width - 1) + 1)
+		self.height=(self.gridHeight * (self.cellSize.height - 1) + 1)
 		
 		# Schedule all cells for redrawAll
 		self.redrawAll()

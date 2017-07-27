@@ -46,6 +46,9 @@ class Controls():
 		# Return list of rects to be updated on surface
 		return updateList
 	
+	def redrawAll(self):
+		self.controlsToRedraw.extend(self.controls)
+	
 	def resize(self, size, position):
 		# Resize surface
 		self.surface = pygame.transform.scale(self.surface, size)

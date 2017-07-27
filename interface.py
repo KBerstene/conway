@@ -212,10 +212,11 @@ class Interface():
 		
 		self.grid.autoAddRemoveCells()
 	
-		#########################################
-		# Schedule entire grid for redrawing    #
-		#########################################
+		############################################
+		# Schedule controls and grid for redrawing #
+		############################################
 		
+		self.controls.redrawAll()
 		self.grid.redrawAll()
 	
 	def zoomOut(self, pos, sizeChange = 2):

@@ -27,6 +27,65 @@ class Controls():
 		self.controls = []
 		self.populateItems()
 	
+	###########################################
+	# DRAWING AND SIZE MANIPULATION METHODS   #
+	###########################################
+	
+	def draw(self, surface):
+		# Set list of rects that will be updated and returned
+		updateList = []
+		
+		# Draw control items
+		for item in self.controlsToRedraw:
+			item.draw(surface)
+			updateList.append(item.get_rect())
+			
+		# Clear list of drawn items
+		self.controlsToRedraw.clear()
+		
+		# Return list of rects to be updated on surface
+		return updateList
+	
+	def resize(self, size, position):
+		# Resize surface
+		self.surface = pygame.transform.scale(self.surface, size)
+		self.rect = self.surface.get_rect(left=position.left, top=position.top)
+		
+		# Regenerate control items
+		self.controls.clear()
+		self.populateItems()
+		self.updateStatusDisplay(self.interface.simRunning)
+		self.updateSpeedDisplay(self.interface.calcThread.speed)
+		self.updatePopLimitDisplay(self.interface.populationLimit)
+		self.updatePopMinDisplay(self.interface.populationMin)
+		self.updateGenerationDisplay(self.interface.generation)
+	
+	###########################################
+	# CONTROL CREATION METHODS                #
+	###########################################
+	
+	def addControl(self, objectList):
+		if (len(self.controls) == 0):
+			self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, objectList))
+		else:
+			self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, objectList))
+		
+		# Add to list for initial draw
+		self.controlsToRedraw.append(self.controls[-1])
+	
+	def addControlPadding(self):
+		# The bottom of the last object is the top of the final padding
+		top = self.controls[len(self.controls) - 1].top + self.controls[len(self.controls) - 1].height
+		left = self.rect.left
+		width = self.rect.width
+		height = self.rect.height - top
+		
+		paddingRect = Rectangle((left, top), (width, height))
+		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
+		
+		# Add to list for initial draw
+		self.controlsToRedraw.append(self.controls[-1])
+	
 	def populateItems(self):
 		# Add controls
 			# Start Button
@@ -62,42 +121,21 @@ class Controls():
 		self.popLimitDisplay.wrapper = self.controls[6]
 		self.popMinDisplay.wrapper = self.controls[8]
 	
-	def addControl(self, objectList):
-		if (len(self.controls) == 0):
-			self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, objectList))
-		else:
-			self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, objectList))
-		
-		# Add to list for initial draw
-		self.controlsToRedraw.append(self.controls[-1])
-			
-	def addControlPadding(self):
-		# The bottom of the last object is the top of the final padding
-		top = self.controls[len(self.controls) - 1].top + self.controls[len(self.controls) - 1].height
-		left = self.rect.left
-		width = self.rect.width
-		height = self.rect.height - top
-		
-		paddingRect = Rectangle((left, top), (width, height))
-		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
-		
-		# Add to list for initial draw
-		self.controlsToRedraw.append(self.controls[-1])
+	###########################################
+	# CONTROL DISPLAY UPDATE METHODS          #
+	###########################################
 	
-	def draw(self, surface):
-		# Set list of rects that will be updated and returned
-		updateList = []
+	def updateGenerationDisplay(self, generation):
+		self.generationDisplay.setText(str(generation))
 		
-		# Draw control items
-		for item in self.controlsToRedraw:
-			item.draw(surface)
-			updateList.append(item.get_rect())
-			
-		# Clear list of drawn items
-		self.controlsToRedraw.clear()
-		
-		# Return list of rects to be updated on surface
-		return updateList
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.generationDisplay.wrapper)
+	
+	def updateSpeedDisplay(self, speed):
+		self.speedDisplay.setText(str(speed))
+
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.speedDisplay.wrapper)
 	
 	def updateStatusDisplay(self, simRunning):
 		if simRunning:
@@ -108,30 +146,18 @@ class Controls():
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.simStatusDisplay.wrapper)
 	
-	def updateSpeedDisplay(self, speed):
-		self.speedDisplay.setText(str(speed))
-
-		# Add to list for redraw
-		self.controlsToRedraw.append(self.speedDisplay.wrapper)
-		
-	def updateGenerationDisplay(self, generation):
-		self.generationDisplay.setText(str(generation))
-		
-		# Add to list for redraw
-		self.controlsToRedraw.append(self.generationDisplay.wrapper)
-		
 	def updatePopLimitDisplay(self, poplimit):
 		self.popLimitDisplay.setText(str(poplimit))
 		
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.popLimitDisplay.wrapper)
-		
+	
 	def updatePopMinDisplay(self, popMin):
 		self.popMinDisplay.setText(str(popMin))
 		
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.popMinDisplay.wrapper)
-		
+	
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):
 			for item in self.controls:
@@ -139,20 +165,6 @@ class Controls():
 					item.clickAction()
 					break
 	
-	def resize(self, size, position):
-		# Resize surface
-		self.surface = pygame.transform.scale(self.surface, size)
-		self.rect = self.surface.get_rect(left=position.left, top=position.top)
-		
-		# Regenerate control items
-		self.controls.clear()
-		self.populateItems()
-		self.updateStatusDisplay(self.interface.simRunning)
-		self.updateSpeedDisplay(self.interface.calcThread.speed)
-		self.updatePopLimitDisplay(self.interface.populationLimit)
-		self.updatePopMinDisplay(self.interface.populationMin)
-		self.updateGenerationDisplay(self.interface.generation)
-		
 
 # Wrapper class for all control objects
 # This is here to allow for padding and dynamic sizing of control objects

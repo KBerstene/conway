@@ -52,12 +52,11 @@ class Interface():
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
 								Position(self.grid.width, 0), self)
-
-
-	def setCalcThread(self,calcThread):
-		self.calcThread = calcThread
-		self.controls.updateSpeedDisplay(self.calcThread.speed)
-		
+	
+	###########################################
+	# MAIN INTERFACE LOOP METHODS             #
+	###########################################
+	
 	def update(self):
 		# Process any mouse/keyboard events
 		if not self.processEvents():
@@ -75,7 +74,7 @@ class Interface():
 		self.fpsClock.tick(self.fpsLimit)
 		
 		return True
-		
+	
 	def processEvents(self):
 		click_pos=(-1,-1)
 
@@ -89,7 +88,7 @@ class Interface():
 					if self.controls.collidepoint(pygame.mouse.get_pos()):
 						pass
 					elif self.grid.collidepoint(pygame.mouse.get_pos()):
-						self.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+						self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
 				elif event.button == 4: # Scroll wheel up
 					self.zoomIn(pygame.mouse.get_pos()) # Zoom in
 				elif event.button == 5: # Scroll wheel down
@@ -124,6 +123,10 @@ class Interface():
 				pass
 		return True
 	
+	###########################################
+	# DRAWING AND SIZE MANIPULATION METHODS   #
+	###########################################
+	
 	def draw(self):
 		# Set list of rects that will be updated and returned
 		updateList = []
@@ -136,56 +139,7 @@ class Interface():
 		
 		# Return list of rects to be updated
 		return updateList
-
-	def reset(self):
-		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
-		self.calcThread.__init__(self)
-
-	#################################
-	# Simulation speed manipulation #
-	#################################
-	def pause(self):
-		self.simRunning = not(self.simRunning)
-		self.controls.updateStatusDisplay(self.simRunning)
-
-	def speedUp(self):
-		self.calcThread.speed += 1
-		self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
-	def speedDown(self):
-		if (self.calcThread.speed > 1):
-			self.calcThread.speed -= 1
-			self.controls.updateSpeedDisplay(self.calcThread.speed)
-	
-	def popLimitUp(self):
-		if self.populationLimit < 8:
-			self.populationLimit += 1
-			self.controls.updatePopLimitDisplay(self.populationLimit)
-	
-	def popLimitDown(self):
-		if self.populationLimit > 1:
-			self.populationLimit -= 1
-			self.controls.updatePopLimitDisplay(self.populationLimit)
-			
-	def popMinUp(self):
-		if self.populationMin < 8:
-			self.populationMin += 1
-			self.controls.updatePopMinDisplay(self.populationMin)
-			
-	def popMinDown(self):
-		if self.populationMin > 1:
-			self.populationMin -= 1
-			self.controls.updatePopMinDisplay(self.populationMin)
-	
-	def stepForward(self):
-		if self.simRunning:
-			self.pause()
-		self.calcThread.calc()
-		return self.simRunning
-	
-	################################
-	# Visual size manipulation     #
-	################################
 	def resize(self, size):
 		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
 		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
@@ -268,3 +222,55 @@ class Interface():
 		# Do everything zoom out does,
 		# but with negative sizeChange
 		self.zoomIn(pos, 0 - sizeChange)
+	
+	##################################################
+	# SIMULATION CONTROLS AND PARAMETER MANIPULATION #
+	##################################################
+	
+	def pause(self):
+		self.simRunning = not(self.simRunning)
+		self.controls.updateStatusDisplay(self.simRunning)
+	
+	def popLimitDown(self):
+		if self.populationLimit > 1:
+			self.populationLimit -= 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+			
+	def popLimitUp(self):
+		if self.populationLimit < 8:
+			self.populationLimit += 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+	
+	def popMinDown(self):
+		if self.populationMin > 1:
+			self.populationMin -= 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+	
+	def popMinUp(self):
+		if self.populationMin < 8:
+			self.populationMin += 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+			
+	def reset(self):
+		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
+		self.calcThread.__init__(self)
+	
+	def setCalcThread(self,calcThread):
+		self.calcThread = calcThread
+		self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def speedDown(self):
+		if (self.calcThread.speed > 1):
+			self.calcThread.speed -= 1
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def speedUp(self):
+		self.calcThread.speed += 1
+		self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def stepForward(self):
+		if self.simRunning:
+			self.pause()
+		self.calcThread.calc()
+		return self.simRunning
+	

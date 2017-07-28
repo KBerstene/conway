@@ -192,10 +192,6 @@ class Grid(pygame.Rect):
 		# Add and remove cells that have moved on or off screen
 		self.autoAddRemoveCells(size)
 		
-		# Reset gridWidth and gridHeight
-		self.gridWidth = math.ceil((size.width - 1) / (self.cellSize.width - 1))
-		self.gridHeight = math.ceil((size.height - 1) / (self.cellSize.height - 1))
-		
 		# Reset constants
 		self.left=location.left
 		self.top=location.top

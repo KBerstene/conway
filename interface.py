@@ -2,6 +2,7 @@
 
 import pygame
 from pygame.locals import *
+from time import time
 from algorithms import *
 from namedtuples import *
 from grid import Grid
@@ -35,6 +36,8 @@ class Interface():
 		self.multiCellDrag = False
 		self.multiCellDragState = True
 		self.mouseHeld = False
+		self.mouseRepeatDelayed = False
+		self.mouseClickTime = 0
 		
 		# Initialize pygame window
 		pygame.init()
@@ -46,7 +49,7 @@ class Interface():
 
 		# Enable key and mouse hold repeating and set limits
 		pygame.key.set_repeat(500,75)
-		self.mouseRepeat = (0, 0)
+		self.mouseRepeat = (500, 75)
 		
 		# Create the initial grid
 		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
@@ -88,6 +91,11 @@ class Interface():
 			elif event.type == MOUSEBUTTONDOWN:
 				# Turn mouse processing on
 				self.processMouse = True
+				# Pretend like the delay has gone through so
+				# the first click will process
+				self.mouseRepeatDelayed = True
+				# Set a very long time in the future so the interval will process
+				self.mouseClickTime = time() + time()
 			elif event.type == MOUSEBUTTONUP:
 				# Turn mouse processing off
 				self.processMouse = False
@@ -129,10 +137,28 @@ class Interface():
 		return True
 	
 	def processMouseEvents(self):
-		if pygame.mouse.get_pressed()[0]: # Left click
-			if (not self.mouseHeld) and self.controls.collidepoint(pygame.mouse.get_pos()):
+		# Get current time
+		currentTime = time()
+
+		###########################################################
+		# Process mouse events that only happen once              #
+		###########################################################
+		
+		if not self.mouseHeld:
+			if pygame.mouse.get_pressed()[0]: # Left click
+				if self.controls.collidepoint(pygame.mouse.get_pos()):
+					pass
+			if pygame.mouse.get_pressed()[1]: # Middle click
 				pass
-			elif self.grid.collidepoint(pygame.mouse.get_pos()):
+			if pygame.mouse.get_pressed()[2]: # Right click
+				pass
+		
+		###########################################################
+		# Process instantly repeated mouse events                 #
+		###########################################################
+		
+		if pygame.mouse.get_pressed()[0]: # Left click
+			if self.grid.collidepoint(pygame.mouse.get_pos()):
 				if not self.mouseHeld:
 					# Activate the cell to change its alive status
 					# We want to be able to drag its new status onto other cells
@@ -148,10 +174,41 @@ class Interface():
 		if pygame.mouse.get_pressed()[2]: # Right click
 			pass
 		
-		# Turn on mouseHeld flag so the next time this processes
-		# it will know that we've been holding it down
-		self.mouseHeld = True
+		###########################################################
+		# Process mouse events that repeat, but need delay        #
+		###########################################################
 		
+		# See if delay is needed
+		if self.mouseHeld:
+			# Has enough time passed since the first delay?
+			if (not self.mouseRepeatDelayed) and (currentTime - self.mouseClickTime < (self.mouseRepeat[0]/1000)):
+				return
+		
+			# Enough time has passed since the first delay, skip delay check next time
+			self.mouseRepeatDelayed = True
+		
+			# Has enough time passed for another repeat to happen?
+			if currentTime - self.mouseClickTime < (self.mouseRepeat[1]/1000):
+				return
+		
+		# Process events for the first time and
+		# after the appropriate delay interval
+		if pygame.mouse.get_pressed()[0]: # Left click
+			pass
+		if pygame.mouse.get_pressed()[1]: # Middle click
+			pass
+		if pygame.mouse.get_pressed()[2]: # Right click
+			pass
+		
+		###########################################################
+		# Turn on mouseHeld flag so the next time this processes  #
+		# it will know that we've been holding it down            #
+		# and how long we've been holding it down                 #
+		###########################################################
+		
+		self.mouseHeld = True
+		self.mouseClickTime = currentTime
+
 	###########################################
 	# DRAWING AND SIZE MANIPULATION METHODS   #
 	###########################################

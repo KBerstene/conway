@@ -16,11 +16,6 @@ class Interface():
 		self.simRunning = False
 		self.calcThread = calcThread
 			# Section sizes
-		# Control width is actually a bit flexible now.
-		# The value below is the max value it will reach.
-		# The minimum value it will reach is
-		# (self.control_width - cell size + 1)
-		# so large cells can squish it a bit.
 		self.control_width = 200
 			# Key presses
 		self.L_SHIFT = 1
@@ -29,11 +24,17 @@ class Interface():
 		self.R_CTRL = 128
 		self.L_ALT = 256
 		self.R_ALT = 512
-	
+		
 		# Declare variables
 		self.populationLimit = 3
 		self.populationMin = 2
 		self.generation = 0
+		
+		# Declare mouse event flags
+		self.processMouse = False
+		self.multiCellDrag = False
+		self.multiCellDragState = True
+		self.mouseHeld = False
 		
 		# Initialize pygame window
 		pygame.init()
@@ -43,8 +44,9 @@ class Interface():
 		# Create clock to limit FPS
 		self.fpsClock = pygame.time.Clock()
 
-		# Enable key hold repeating and set limits
+		# Enable key and mouse hold repeating and set limits
 		pygame.key.set_repeat(500,75)
+		self.mouseRepeat = (0, 0)
 		
 		# Create the initial grid
 		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
@@ -77,24 +79,24 @@ class Interface():
 	
 	def processEvents(self):
 		click_pos=(-1,-1)
-
+		
 		# Get pygame events to see if/what key is pressed
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
 				return False
 			elif event.type == MOUSEBUTTONDOWN:
-				if event.button == 1: # Left click
-					if self.controls.collidepoint(pygame.mouse.get_pos()):
-						pass
-					elif self.grid.collidepoint(pygame.mouse.get_pos()):
-						self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
-				elif event.button == 4: # Scroll wheel up
-					self.zoomIn(pygame.mouse.get_pos()) # Zoom in
-				elif event.button == 5: # Scroll wheel down
-					self.zoomOut(pygame.mouse.get_pos()) # Zoom out
-				else:
-					pass
+				# Turn mouse processing on
+				self.processMouse = True
+			elif event.type == MOUSEBUTTONUP:
+				# Turn mouse processing off
+				self.processMouse = False
+				# Reset mouse flags
+				self.multiCellDrag = False
+				self.mouseHeld = False
+			elif event.type == MOUSEMOTION:
+				if self.processMouse:
+					self.multiCellDrag = True
 			elif event.type == KEYDOWN:
 				mods = pygame.key.get_mods()# Get modifier keys
 				if event.key == K_LEFT:
@@ -121,8 +123,35 @@ class Interface():
 				self.resize(event.dict['size'])
 			else:
 				pass
+		
+		if self.processMouse:
+			self.processMouseEvents()
 		return True
 	
+	def processMouseEvents(self):
+		if pygame.mouse.get_pressed()[0]: # Left click
+			if (not self.mouseHeld) and self.controls.collidepoint(pygame.mouse.get_pos()):
+				pass
+			elif self.grid.collidepoint(pygame.mouse.get_pos()):
+				if not self.mouseHeld:
+					# Activate the cell to change its alive status
+					# We want to be able to drag its new status onto other cells
+					self.multiCellDragState = self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+				elif self.multiCellDrag:
+					# If we are trying to bring multiple cells to life,
+					# then check the clicked cell's alive state before
+					# clicking on it.
+					if self.grid.getCell(pygame.mouse.get_pos()).alive != self.multiCellDragState:
+						self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+		if pygame.mouse.get_pressed()[1]: # Middle click
+			pass
+		if pygame.mouse.get_pressed()[2]: # Right click
+			pass
+		
+		# Turn on mouseHeld flag so the next time this processes
+		# it will know that we've been holding it down
+		self.mouseHeld = True
+		
 	###########################################
 	# DRAWING AND SIZE MANIPULATION METHODS   #
 	###########################################

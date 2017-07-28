@@ -300,6 +300,8 @@ class Grid(pygame.Rect):
 		
 		# Set cell for redrawing
 		self.cellsToRedraw.append(cell)
+		
+		return cell.alive
 	
 	def getCell(self, pos):
 		if self.collidepoint(pos):

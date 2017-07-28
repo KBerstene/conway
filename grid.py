@@ -13,7 +13,7 @@ class Grid(pygame.Rect):
 		self.gridHeight = math.ceil((dimensions.height - 1) / (self.cellSize.height - 1))
 
 		# Call Rect constructor
-		super().__init__(location.left, location.top, (self.gridWidth * (self.cellSize.width - 1) + 1), (self.gridHeight * (self.cellSize.height - 1) + 1))
+		super().__init__(location.left, location.top, dimensions.width, dimensions.height)
 		
 		# Create constants
 		self.cellSize = cellSize
@@ -195,8 +195,8 @@ class Grid(pygame.Rect):
 		# Reset constants
 		self.left=location.left
 		self.top=location.top
-		self.width=(self.gridWidth * (self.cellSize.width - 1) + 1)
-		self.height=(self.gridHeight * (self.cellSize.height - 1) + 1)
+		self.width=size.width
+		self.height=size.height
 		
 		# Schedule all cells for redrawAll
 		self.redrawAll()

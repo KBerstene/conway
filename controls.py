@@ -31,6 +31,11 @@ class Controls():
 	# DRAWING AND SIZE MANIPULATION METHODS   #
 	###########################################
 	
+	def checkGridOverlap(self, cellList):
+		for control in self.controls:
+			if control.collidelist(cellList) != -1:
+				self.controlsToRedraw.append(control)
+	
 	def draw(self, surface):
 		# Set list of rects that will be updated and returned
 		updateList = []
@@ -171,7 +176,7 @@ class Controls():
 
 # Wrapper class for all control objects
 # This is here to allow for padding and dynamic sizing of control objects
-class ControlWrapper():
+class ControlWrapper(pygame.Surface):
 	# Constructor
 	def __init__(self, pos, width, objectList, padding = 5, click = lambda:None):
 		# Create object list
@@ -183,16 +188,15 @@ class ControlWrapper():
 			if obj.height > maxHeight:
 				maxHeight = obj.height
 		
-		# Create surface
-		self.surface = pygame.Surface((width, maxHeight + padding + padding)) # add padding twice to cover both top and bottom padding
-		self.surface.fill(pygame.Color("white"))
+		# Call surface init
+		super().__init__((width, maxHeight + padding + padding)) # add padding twice to cover both top and bottom padding
 		
 		# Create size constants
 		self.pos = pos
 		self.left = pos.left
 		self.top = pos.top
 		self.width = width
-		self.height = self.surface.get_rect().height
+		self.height = self.get_rect().height
 		
 		# Get amount of extra width around objects
 		spareWidth = width - padding # Initial left padding
@@ -209,31 +213,31 @@ class ControlWrapper():
 			self.objects[i].left = leftPadding + padding
 			# Set new left
 			leftPadding = self.objects[i].left + self.objects[i].width
-			
-		# Draw objects
-		for obj in self.objects:
-			obj.draw(self.surface)
-
+	
 	def draw(self, surface):
 		# Reset surface to white
-		self.surface.fill(pygame.Color("white"))
+		super().fill(pygame.Color("white"))
 		
 		# Draw objects onto control surface
 		for obj in self.objects:
-			obj.draw(self.surface)
+			obj.draw(self)
 		
 		# Draw control surface
-		surface.blit(self.surface, self.pos)
+		surface.blit(self, self.pos)
 	
 	def collidepoint(self, pos):
-		for obj in self.objects:
-			if obj.collidepoint((pos[0] - self.pos[0], pos[1] - self.pos[1])):
-				self.clickAction = obj.clickAction
-				return True
+		if self.get_rect().collidepoint(pos):
+			for obj in self.objects:
+				if obj.collidepoint((pos[0] - self.pos[0], pos[1] - self.pos[1])):
+					self.clickAction = obj.clickAction
+					return True
 		return False
 	
+	def collidelist(self, list):
+		return self.get_rect().collidelist(list)
+	
 	def get_rect(self):
-		return self.surface.get_rect(left = self.pos[0], top = self.pos[1])
+		return super().get_rect(left = self.pos[0], top = self.pos[1])
 		
 # Blank rectangle that can self-draw
 class Rectangle(pygame.Rect):

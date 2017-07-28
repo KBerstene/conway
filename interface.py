@@ -134,6 +134,10 @@ class Interface():
 		# Draw grid
 		updateList.extend(self.grid.draw(self.window))
 		
+		# See if any cells that need draw updates collide with
+		# any controls, and set those controls to redraw as well
+		self.controls.checkGridOverlap(updateList)
+		
 		# Draw control interface
 		updateList.extend(self.controls.draw(self.window))
 		

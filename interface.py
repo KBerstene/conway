@@ -89,13 +89,20 @@ class Interface():
 				pygame.quit()
 				return False
 			elif event.type == MOUSEBUTTONDOWN:
-				# Turn mouse processing on
-				self.processMouse = True
-				# Pretend like the delay has gone through so
-				# the first click will process
-				self.mouseRepeatDelayed = True
-				# Set a very long time in the future so the interval will process
-				self.mouseClickTime = time() + time()
+				if event.button <= 3: # Left, middle, or right click get special processing
+					# Turn mouse processing on
+					self.processMouse = True
+					# Pretend like the delay has gone through so
+					# the first click will process
+					self.mouseRepeatDelayed = True
+					# Set a very long time in the future so the interval will process
+					self.mouseClickTime = time() + time()
+				elif event.button == 4: # Scroll wheel up
+					self.zoomIn(pygame.mouse.get_pos()) # Zoom in
+				elif event.button == 5: # Scroll wheel down
+					self.zoomOut(pygame.mouse.get_pos()) # Zoom out
+				else:
+					pass
 			elif event.type == MOUSEBUTTONUP:
 				# Turn mouse processing off
 				self.processMouse = False

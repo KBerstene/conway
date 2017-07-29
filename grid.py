@@ -84,25 +84,20 @@ class Grid(pygame.Rect):
 			i = 0
 			for j in range(self.gridHeight):
 				self.cells[i][j] = Cell(Position(self.cells[i+1][j].left - self.cellSize.width + 1, self.cells[i+1][j].top), size = self.cellSize)
-			
-			# After new column is created, create neighbors for each cell
-			# and update neighbors for cells in the column next to it
-			self.createColumnNeighbors(i)
-			self.createColumnNeighbors(i+1)
 		else:
 			# Create new column
 			# Add new column onto end of cell array
 			self.cells.append([None for x in range(self.gridHeight)])
 			
 			# Set position for new cells in column
-			i = self.gridWidth - 1
+			i = self.gridWidth - 2
 			for j in range(self.gridHeight):
-				self.cells[i][j] = Cell(Position(self.cells[i-1][j].left + self.cellSize.width - 1, self.cells[i-1][j].top), size = self.cellSize)
+				self.cells[i+1][j] = Cell(Position(self.cells[i][j].left + self.cellSize.width - 1, self.cells[i][j].top), size = self.cellSize)
 			
-			# After new column is created, create neighbors for each cell
-			# and update neighbors for cells in the column next to it
-			self.createColumnNeighbors(i)
-			self.createColumnNeighbors(i-1)
+		# After new column is created, create neighbors for each cell
+		# and update neighbors for cells in the column next to it
+		self.createColumnNeighbors(i)
+		self.createColumnNeighbors(i+1)
 		
 	def addRow(self, prepend = False):
 		# Grid gets one taller
@@ -113,21 +108,16 @@ class Grid(pygame.Rect):
 			j = 0
 			for i in range(self.gridWidth):
 				self.cells[i].insert(0, Cell(Position(self.cells[i][j].left, self.cells[i][j].top - self.cellSize.height + 1), size = self.cellSize))
-				
-			# After new row is created, create neighbors for each cell
-			# and update neighbors for cells in the row next to it
-			self.createRowNeighbors(j)
-			self.createRowNeighbors(j+1)
 		else:
 			# Add a cell into each column to form a new row
 			j = self.gridHeight - 2
 			for i in range(self.gridWidth):
 				self.cells[i].append(Cell(Position(self.cells[i][j].left, self.cells[i][j].top + self.cellSize.height - 1), size = self.cellSize))
 			
-			# After new row is created, create neighbors for each cell
-			# and update neighbors for cells in the row next to it
-			self.createRowNeighbors(j)
-			self.createRowNeighbors(j-1)
+		# After new row is created, create neighbors for each cell
+		# and update neighbors for cells in the row next to it
+		self.createRowNeighbors(j)
+		self.createRowNeighbors(j+1)
 				
 	def autoAddRemoveCells(self, size = None):
 		# I can't assign self attributes as a default parameter value,

@@ -22,6 +22,9 @@ class Grid(pygame.Rect):
 		
 		# Create list of cells that need to be drawn
 		self.cellsToRedraw = []
+		
+		# Create list of cells that need to be dead/alive
+		self.cellsToCalc = []
 	
 		# Create an array of cells
 		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
@@ -290,6 +293,7 @@ class Grid(pygame.Rect):
 		
 		# Set cell for redrawing
 		self.cellsToRedraw.append(cell)
+		self.cellsToCalc.append(cell)
 		
 		return cell.alive
 	

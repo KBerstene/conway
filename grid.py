@@ -24,7 +24,7 @@ class Grid(pygame.Rect):
 		self.cellsToRedraw = []
 	
 		# Create an array of cells
-		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
+		self.cells = [[None for x in range(self.gridHeight)] for x in range(self.gridWidth)]
 		
 		# Set each square's position
 		for i in range(self.gridWidth):
@@ -72,6 +72,11 @@ class Grid(pygame.Rect):
 	###########################################
 	
 	def addColumn(self, prepend = False):
+		# Create list of cells for neighbor creation
+		# are added by tuples of their coordinates:
+		# (x, y)
+		newNeighbors = []
+		
 		# Grid gets one wider
 		self.gridWidth = self.gridWidth + 1
 		
@@ -84,6 +89,9 @@ class Grid(pygame.Rect):
 			i = 0
 			for j in range(self.gridHeight):
 				self.cells[i][j] = Cell(Position(self.cells[i+1][j].left - self.cellSize.width + 1, self.cells[i+1][j].top), size = self.cellSize)
+				# Add the new cell and its reference cell for new neighbor creation
+				newNeighbors.append((i, j))
+				newNeighbors.append((i+1, j))
 		else:
 			# Create new column
 			# Add new column onto end of cell array
@@ -93,13 +101,19 @@ class Grid(pygame.Rect):
 			i = self.gridWidth - 2
 			for j in range(self.gridHeight):
 				self.cells[i+1][j] = Cell(Position(self.cells[i][j].left + self.cellSize.width - 1, self.cells[i][j].top), size = self.cellSize)
+				# Add the new cell and its reference cell for new neighbor creation
+				newNeighbors.append((i, j))
+				newNeighbors.append((i+1, j))
 			
-		# After new column is created, create neighbors for each cell
-		# and update neighbors for cells in the column next to it
-		self.createColumnNeighbors(i)
-		self.createColumnNeighbors(i+1)
+		# Return the list of cells needing new neighbors
+		return newNeighbors
 		
 	def addRow(self, prepend = False):
+		# Create list of cells for neighbor creation
+		# are added by tuples of their coordinates:
+		# (x, y)
+		newNeighbors = []
+		
 		# Grid gets one taller
 		self.gridHeight = self.gridHeight + 1
 		
@@ -108,16 +122,20 @@ class Grid(pygame.Rect):
 			j = 0
 			for i in range(self.gridWidth):
 				self.cells[i].insert(0, Cell(Position(self.cells[i][j].left, self.cells[i][j].top - self.cellSize.height + 1), size = self.cellSize))
+				# Add the new cell and its reference cell for new neighbor creation
+				newNeighbors.append((i, 0))
+				newNeighbors.append((i, 1))
 		else:
 			# Add a cell into each column to form a new row
 			j = self.gridHeight - 2
 			for i in range(self.gridWidth):
 				self.cells[i].append(Cell(Position(self.cells[i][j].left, self.cells[i][j].top + self.cellSize.height - 1), size = self.cellSize))
+				# Add the new cell and its reference cell for new neighbor creation
+				newNeighbors.append((i, len(self.cells[i])-1))
+				newNeighbors.append((i, len(self.cells[i])-2))
 			
-		# After new row is created, create neighbors for each cell
-		# and update neighbors for cells in the row next to it
-		self.createRowNeighbors(j)
-		self.createRowNeighbors(j+1)
+		# Return the list of cells needing new neighbors
+		return newNeighbors
 				
 	def autoAddRemoveCells(self, size = None):
 		# I can't assign self attributes as a default parameter value,
@@ -125,25 +143,28 @@ class Grid(pygame.Rect):
 		if size == None:
 			size = Dimensions(self.width, self.height)
 	
+		# Create list for cells that need new neighbors generated
+		newNeighbors = []
+		
 		################################################
 		# Add additional cells that have come onscreen #
 		################################################
 		
 		# Check to add top row
 		while self.cells[0][0].top > 0:
-			self.addRow(prepend = True)
+			newNeighbors.extend(self.addRow(prepend = True))
 		
 		# Check to add bottom row
 		while self.cells[-1][-1].top + self.cellSize.height < size.height:
-			self.addRow(prepend = False)
+			newNeighbors.extend(self.addRow(prepend = False))
 		
 		# Check to add left column
 		while self.cells[0][0].left > 0:
-			self.addColumn(prepend = True)
+			newNeighbors.extend(self.addColumn(prepend = True))
 		
 		# Check to add right column
 		while self.cells[-1][-1].left + self.cellSize.width < size.width:
-			self.addColumn(prepend = False)
+			newNeighbors.extend(self.addColumn(prepend = False))
 		
 		##########################################
 		# Remove cells that have moved offscreen #
@@ -164,7 +185,13 @@ class Grid(pygame.Rect):
 		# Check to remove right columns
 		while self.cells[-1][-1].left > size.width:
 			self.removeColumn(-1)
-	
+		
+		##########################################
+		# Create neighbors for new cells         #
+		##########################################
+		
+		self.createCellNeighbors(newNeighbors)
+		
 	def removeColumn(self, columnIndex):
 		self.cells.pop(columnIndex)
 		
@@ -195,86 +222,42 @@ class Grid(pygame.Rect):
 	# NEIGHBOR CREATION METHODS               #
 	###########################################
 	
-	def createCellNeighbors(self):
-		for i in range(self.gridWidth):
-			for j in range(self.gridHeight):
-			# Clear neighbors list
-				self.cells[i][j].neighbors = []
-				
-			# Top left
-				if i > 0 and j > 0: self.cells[i][j].neighbors.append(self.cells[i-1][j-1])
-			# Top middle
-				if j > 0: self.cells[i][j].neighbors.append(self.cells[i][j-1])
-			# Top right
-				if j > 0 and i + 1 < self.gridWidth: self.cells[i][j].neighbors.append(self.cells[i+1][j-1])
-			
-			# Left
-				if i > 0: self.cells[i][j].neighbors.append(self.cells[i-1][j])
-			# Right
-				try: self.cells[i][j].neighbors.append(self.cells[i+1][j])
-				except: pass
-			
-			# Bottom left
-				if i > 0 and j + 1 < self.gridHeight: self.cells[i][j].neighbors.append(self.cells[i-1][j+1])
-			# Bottom middle
-				try: self.cells[i][j].neighbors.append(self.cells[i][j+1])
-				except: pass
-			# Bottom right
-				try: self.cells[i][j].neighbors.append(self.cells[i+1][j+1])
-				except: pass
-	
-	def createColumnNeighbors(self, index):
-		for j in range(self.gridHeight):
-			# Clear neighbors list
-			self.cells[index][j].neighbors = []
-				
-			# Top left
-			if index > 0 and j > 0: self.cells[index][j].neighbors.append(self.cells[index-1][j-1])
-			# Top middle
-			if j > 0: self.cells[index][j].neighbors.append(self.cells[index][j-1])
-			# Top right
-			if j > 0 and index + 1 < self.gridWidth: self.cells[index][j].neighbors.append(self.cells[index+1][j-1])
-			
-			# Left
-			if index > 0: self.cells[index][j].neighbors.append(self.cells[index-1][j])
-			# Right
-			try: self.cells[index][j].neighbors.append(self.cells[index+1][j])
-			except: pass
-			
-			# Bottom left
-			if index > 0 and j + 1 < self.gridHeight: self.cells[index][j].neighbors.append(self.cells[index-1][j+1])
-			# Bottom middle
-			try: self.cells[index][j].neighbors.append(self.cells[index][j+1])
-			except: pass
-			# Bottom right
-			try: self.cells[index][j].neighbors.append(self.cells[index+1][j+1])
-			except: pass
-	
-	def createRowNeighbors(self, index):
-		for i in range(self.gridWidth):
-			# Clear neighbors list
-			self.cells[i][index].neighbors = []
-			
-			# Top left
-			if i > 0 and index > 0: self.cells[i][index].neighbors.append(self.cells[i-1][index-1])
-			# Top middle
-			if index > 0: self.cells[i][index].neighbors.append(self.cells[i][index-1])
-			# Top right
-			if index > 0 and i + 1 < self.gridWidth: self.cells[i][index].neighbors.append(self.cells[i+1][index-1])
+	def createCellNeighbors(self, cellCoordinates = None):
+		# If no list passed, create a list
+		# of all cell coordinates
+		if cellCoordinates == None:
+			cellCoordinates = []
+			for i in range(self.gridWidth):
+				for j in range(self.gridHeight):
+					cellCoordinates.append((i,j))
 		
-			# Left
-			if i > 0: self.cells[i][index].neighbors.append(self.cells[i-1][index])
-			# Right
-			try: self.cells[i][index].neighbors.append(self.cells[i+1][index])
+		for coords in cellCoordinates:
+			i = coords[0]
+			j = coords[1]
+			
+		# Clear neighbors list
+			self.cells[i][j].neighbors = []
+			
+		# Top left
+			if i > 0 and j > 0: self.cells[i][j].neighbors.append(self.cells[i-1][j-1])
+		# Top middle
+			if j > 0: self.cells[i][j].neighbors.append(self.cells[i][j-1])
+		# Top right
+			if j > 0 and i + 1 < self.gridWidth: self.cells[i][j].neighbors.append(self.cells[i+1][j-1])
+		
+		# Left
+			if i > 0: self.cells[i][j].neighbors.append(self.cells[i-1][j])
+		# Right
+			try: self.cells[i][j].neighbors.append(self.cells[i+1][j])
 			except: pass
 		
-			# Bottom left
-			if i > 0 and index + 1 < self.gridHeight: self.cells[i][index].neighbors.append(self.cells[i-1][index+1])
-			# Bottom middle
-			try: self.cells[i][index].neighbors.append(self.cells[i][index+1])
+		# Bottom left
+			if i > 0 and j + 1 < self.gridHeight: self.cells[i][j].neighbors.append(self.cells[i-1][j+1])
+		# Bottom middle
+			try: self.cells[i][j].neighbors.append(self.cells[i][j+1])
 			except: pass
-			# Bottom right
-			try: self.cells[i][index].neighbors.append(self.cells[i+1][index+1])
+		# Bottom right
+			try: self.cells[i][j].neighbors.append(self.cells[i+1][j+1])
 			except: pass
 	
 	###########################################

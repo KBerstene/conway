@@ -293,7 +293,8 @@ class Grid(pygame.Rect):
 		
 		# Set cell for redrawing
 		self.cellsToRedraw.append(cell)
-		self.cellsToCalc.append(cell)
+		if cell.alive:
+			self.cellsToCalc.append(cell)
 		
 		return cell.alive
 	
@@ -315,7 +316,7 @@ class Grid(pygame.Rect):
 				break
 			except:
 				pass
-		
+
 		return Coordinates(x, y)
 	
 

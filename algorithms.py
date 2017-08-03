@@ -21,26 +21,30 @@ def calc_status(interface):
 	
 	#########################################
 	for cell in cellsToCalc:
-		x , y = interface.grid.getCellIndex(cell)
-		for z in range (len(cells[x][y].neighbors)):
-			neighborsToCalc.append(cells[x][y].neighbors[z])
+		cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
+		for z in range (len(cells[cell.gridx][cell.gridy].neighbors)):
+			neighborsToCalc.append(cells[cell.gridx][cell.gridy].neighbors[z])
+			
 	
+	
+	#print(cellsToCalc)
 	for cell in neighborsToCalc:
-		cellsToCalc.append(cell)
-	
-	
-	#print(neighborsToCalc)
-	
+		unique = True
+		for item in cellsToCalc:
+			if item == cell:
+				#print("break")
+				unique = False
+				break
+		#print("added")
+		if unique:
+			cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
+			cellsToCalc.append(cell)
+		
+	#set(cellsToCalc)
+	#print(cellsToCalc)
 	
 	for cell in cellsToCalc:
-		x , y = interface.grid.getCellIndex(cell)
-	
-	
-	
-	
-	
-	
-	
+		#x , y = interface.grid.getCellIndex(cell)
 	
 	# Iterate through cells to see what needs to be changed
 	#for x in range(gridLength):
@@ -49,21 +53,21 @@ def calc_status(interface):
 		totalAliveNeighbors = 0
 
 		# Add neighbors of each cell
-		for z in range (len(cells[x][y].neighbors)):		
-			if cells[x][y].neighbors[z].alive == True:
+		for z in range (len(cells[cell.gridx][cell.gridy].neighbors)):		
+			if cells[cell.gridx][cell.gridy].neighbors[z].alive == True:
 				totalAliveNeighbors += 1
 				if totalAliveNeighbors > interface.populationLimit:
 					break
 			
 		# Decide if cell is alive or dead	
 		if totalAliveNeighbors < interface.populationMin:
-			tempGrid[x][y] = False
+			tempGrid[cell.gridx][cell.gridy] = False
 		elif totalAliveNeighbors >= interface.populationMin and totalAliveNeighbors < interface.populationLimit:
-			tempGrid[x][y] = cells[x][y].alive
+			tempGrid[cell.gridx][cell.gridy] = cells[cell.gridx][cell.gridy].alive
 		elif totalAliveNeighbors == interface.populationLimit:
-			tempGrid[x][y] = True
+			tempGrid[cell.gridx][cell.gridy] = True
 		else:
-			tempGrid[x][y] = False
+			tempGrid[cell.gridx][cell.gridy] = False
 				
 	cellsToCalc.clear()
 	# Iterate through tempgrid and update grid			
@@ -73,6 +77,8 @@ def calc_status(interface):
 				cells[x][y].alive = tempGrid[x][y]
 				# Add cells to update lists
 				interface.grid.cellsToRedraw.append(cells[x][y])
+				
+			if cells[x][y].alive:
 				cellsToCalc.append(cells[x][y])
 				
 				#x,y = interface.grid.getCellIndex(cells[x][y])

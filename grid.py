@@ -297,6 +297,7 @@ class Grid(pygame.Rect):
 		self.cellsToRedraw.append(cell)
 		if cell.alive:
 			self.cellsToCalc.append(cell)
+			cell.added = True
 		
 		return cell.alive
 	
@@ -335,9 +336,8 @@ class Cell(pygame.Rect):
 		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
 		self.alive=False
 		self.neighbors=[]
-		self.gridx = 0
-		self.gridy = 0
-	
+		self.added = False
+			
 	def resize(self, newSize):
 		self.width = newSize.width
 		self.height = newSize.height

@@ -29,6 +29,10 @@ def calc_status(interface):
 	
 	#print(cellsToCalc)
 	for cell in neighborsToCalc:
+		if cell.added == False:
+			cell.added = True
+			cellsToCalc.append(cell)
+			
 		#unique = True
 		#for item in cellsToCalc:
 			#if item == cell:
@@ -38,12 +42,13 @@ def calc_status(interface):
 		#print("added")
 		#if unique:
 			#cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
-		cellsToCalc.append(cell)
+		
 		
 	#set(cellsToCalc)
-	#print(cellsToCalc)
+	#print(len(cellsToCalc))
 	
 	for cell in cellsToCalc:
+		cell.added = False
 		#x , y = interface.grid.getCellIndex(cell)
 	
 	# Iterate through cells to see what needs to be changed
@@ -80,6 +85,7 @@ def calc_status(interface):
 				
 			if cells[x][y].alive:
 				cellsToCalc.append(cells[x][y])
+				cells[x][y].added = True
 				
 				#x,y = interface.grid.getCellIndex(cells[x][y])
 				#Print(x , y)

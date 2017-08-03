@@ -18,10 +18,10 @@ def calc_status(interface):
 	
 	# Create array of new alive/dead stats
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
-	
+	#interface.grid.indexGrid()
 	#########################################
 	for cell in cellsToCalc:
-		cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
+		#cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
 		for z in range (len(cells[cell.gridx][cell.gridy].neighbors)):
 			neighborsToCalc.append(cells[cell.gridx][cell.gridy].neighbors[z])
 			
@@ -29,16 +29,16 @@ def calc_status(interface):
 	
 	#print(cellsToCalc)
 	for cell in neighborsToCalc:
-		unique = True
-		for item in cellsToCalc:
-			if item == cell:
+		#unique = True
+		#for item in cellsToCalc:
+			#if item == cell:
 				#print("break")
-				unique = False
-				break
+				#unique = False
+				#break
 		#print("added")
-		if unique:
-			cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
-			cellsToCalc.append(cell)
+		#if unique:
+			#cell.gridx , cell.gridy = interface.grid.getCellIndex(cell)
+		cellsToCalc.append(cell)
 		
 	#set(cellsToCalc)
 	#print(cellsToCalc)

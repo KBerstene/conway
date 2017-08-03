@@ -167,6 +167,8 @@ class Grid(pygame.Rect):
 		# Check to remove right columns
 		while self.cells[-1][-1].left > size.width:
 			self.removeColumn(-1)
+			
+		self.indexGrid()
 	
 	def removeColumn(self, columnIndex):
 		self.cells.pop(columnIndex)
@@ -318,6 +320,12 @@ class Grid(pygame.Rect):
 				pass
 
 		return Coordinates(x, y)
+		
+	def indexGrid(self):
+		for x in range(self.gridWidth):
+			for y in range(self.gridHeight):
+				self.cells[x][y].gridx = x
+				self.cells[x][y].gridy = y
 	
 
 # Subclass of Rect to add alive/dead status
@@ -327,6 +335,8 @@ class Cell(pygame.Rect):
 		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
 		self.alive=False
 		self.neighbors=[]
+		self.gridx = 0
+		self.gridy = 0
 	
 	def resize(self, newSize):
 		self.width = newSize.width

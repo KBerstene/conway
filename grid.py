@@ -167,7 +167,8 @@ class Grid(pygame.Rect):
 		# Check to remove right columns
 		while self.cells[-1][-1].left > size.width:
 			self.removeColumn(-1)
-			
+		
+		# Index all cells to match updated grid
 		self.indexGrid()
 	
 	def removeColumn(self, columnIndex):

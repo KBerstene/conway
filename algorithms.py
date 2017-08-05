@@ -5,6 +5,7 @@ def calc_status(interface):
 	cells = interface.grid.cells
 	cellsToCalc = interface.grid.cellsToCalc
 	neighborsToCalc = []
+	tempList = []
 
 	try:
 		gridLength = len(cells)
@@ -20,10 +21,10 @@ def calc_status(interface):
 	
 	# Iterate through list of cells to add neighbors to temp list if they are not in either list
 	for cell in cellsToCalc:
-		for z in range (len(cells[cell.gridx][cell.gridy].neighbors)):
-			if cells[cell.gridx][cell.gridy].neighbors[z].added == False:
+		for z in range (len(cell.neighbors)):
+			if cell.neighbors[z].added == False:
 				cell.added = True
-				neighborsToCalc.append(cells[cell.gridx][cell.gridy].neighbors[z])
+				neighborsToCalc.append(cell.neighbors[z])
 			
 	# Iterate through temp list to add cells to cellsToCalc
 	for cell in neighborsToCalc:
@@ -36,8 +37,8 @@ def calc_status(interface):
 		totalAliveNeighbors = 0
 
 		# Add neighbors of each cell
-		for z in range (len(cells[cell.gridx][cell.gridy].neighbors)):		
-			if cells[cell.gridx][cell.gridy].neighbors[z].alive == True:
+		for z in range (len(cell.neighbors)):		
+			if cell.neighbors[z].alive == True:
 				totalAliveNeighbors += 1
 				if totalAliveNeighbors > interface.populationLimit:
 					break
@@ -46,7 +47,7 @@ def calc_status(interface):
 		if totalAliveNeighbors < interface.populationMin:
 			tempGrid[cell.gridx][cell.gridy] = False
 		elif totalAliveNeighbors >= interface.populationMin and totalAliveNeighbors < interface.populationLimit:
-			tempGrid[cell.gridx][cell.gridy] = cells[cell.gridx][cell.gridy].alive
+			tempGrid[cell.gridx][cell.gridy] = cell.alive
 		elif totalAliveNeighbors == interface.populationLimit:
 			tempGrid[cell.gridx][cell.gridy] = True
 		else:
@@ -64,6 +65,7 @@ def calc_status(interface):
 			if cells[x][y].alive:
 				cellsToCalc.append(cells[x][y])
 				cells[x][y].added = True
+						
 				
 	#Increase generation and update display
 	interface.generation += 1

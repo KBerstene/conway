@@ -2,29 +2,17 @@
 
 def calc_status(interface):
 	# Declare variables
-	cells = interface.grid.cells
 	cellsToCalc = interface.grid.cellsToCalc
 	neighborsToCalc = []
 	tempList = []
 
-	try:
-		gridLength = len(cells)
-		gridHeight = len(cells[0])
-	except IndexError:
-		# Grid length or height is 0
-		# because screen size is too small
-		# Don't do any calculations
-		return
-	
-	# Create array of new alive/dead stats
-	#tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
 	
 	# Iterate through list of cells to add neighbors to temp list if they are not in either list
 	for cell in cellsToCalc:
-		for z in range (len(cell.neighbors)):
-			if cell.neighbors[z].added == False:
-				cell.neighbors[z].added = True
-				neighborsToCalc.append(cell.neighbors[z])
+		for neighbor in cell.neighbors:
+			if neighbor.added == False:
+				neighbor.added = True
+				neighborsToCalc.append(neighbor)
 			
 	# Iterate through temp list to add cells to cellsToCalc
 	for cell in neighborsToCalc:
@@ -37,8 +25,8 @@ def calc_status(interface):
 		totalAliveNeighbors = 0
 
 		# Add neighbors of each cell
-		for z in range (len(cell.neighbors)):		
-			if cell.neighbors[z].alive == True:
+		for neighbor in cell.neighbor:		
+			if neighbor.alive == True:
 				totalAliveNeighbors += 1
 				if totalAliveNeighbors > interface.populationLimit:
 					break
@@ -55,16 +43,7 @@ def calc_status(interface):
 			
 		# Add cells to temp list	
 		tempList.append(cell)
-		
-		#if totalAliveNeighbors < interface.populationMin:
-			#tempGrid[cell.gridx][cell.gridy] = False
-		#elif totalAliveNeighbors >= interface.populationMin and totalAliveNeighbors < interface.populationLimit:
-			#tempGrid[cell.gridx][cell.gridy] = cell.alive
-		#elif totalAliveNeighbors == interface.populationLimit:
-			#tempGrid[cell.gridx][cell.gridy] = True
-		#else:
-			#tempGrid[cell.gridx][cell.gridy] = False
-		
+				
 	# Clear calc list
 	cellsToCalc.clear()
 			
@@ -77,21 +56,7 @@ def calc_status(interface):
 			cellsToCalc.append(cell)# Add cells to update lists
 			cell.added = True
 		# Reset temp status
-		cell.tempAlive = False
-	
-	
-	
-	# Iterate through tempgrid and update grid			
-	# for x in range(gridLength):
-		# for y in range(gridHeight):
-			# if cells[x][y].alive != tempGrid[x][y]:
-				# cells[x][y].alive = tempGrid[x][y]
-			# # Add cells to update lists
-				# interface.grid.cellsToRedraw.append(cells[x][y])
-			# if cells[x][y].alive:
-				# cellsToCalc.append(cells[x][y])
-				# cells[x][y].added = True
-				
+		cell.tempAlive = False			
 					
 	#Increase generation and update display
 	interface.generation += 1

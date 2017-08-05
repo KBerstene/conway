@@ -18,13 +18,6 @@ class Interface():
 		self.calcThread = calcThread
 			# Section sizes
 		self.control_width = 200
-			# Key presses
-		self.L_SHIFT = 1
-		self.R_SHIFT = 2
-		self.L_CTRL = 64
-		self.R_CTRL = 128
-		self.L_ALT = 256
-		self.R_ALT = 512
 		
 		# Declare variables
 		self.populationLimit = 3
@@ -115,16 +108,16 @@ class Interface():
 			elif event.type == KEYDOWN:
 				mods = pygame.key.get_mods()# Get modifier keys
 				if event.key == K_LEFT:
-					if mods == self.L_SHIFT:
+					if mods == KMOD_LSHIFT:
 						self.popLimitDown()
-					elif mods == self.L_CTRL:
+					elif mods == KMOD_LCTRL:
 						self.popMinDown()
 					else:
 						self.speedDown()
 				elif event.key == K_RIGHT:
-					if mods == self.L_SHIFT:
+					if mods == KMOD_LSHIFT:
 						self.popLimitUp()
-					elif mods == self.L_CTRL:
+					elif mods == KMOD_LCTRL:
 						self.popMinUp()
 					else:
 						self.speedUp()

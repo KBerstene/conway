@@ -263,13 +263,12 @@ class RectWithText(pygame.Rect):
 		self.fontPath = font
 		self.fontSize = fontSize
 		self.text = text
-		self.setText(self.text)
-
+		
 	def setText(self, text):
 		self.text = text
 		self.textSurface = pygame.font.Font(self.fontPath, self.fontSize).render(text, 1, pygame.Color("black"))
 		self.textPos = (self.centerx - (self.textSurface.get_rect().width / 2), self.centery - (self.textSurface.get_rect().height / 2))
-
+		
 	def draw(self, window):
 		self.setText(self.text)
 		pygame.draw.rect(window, pygame.Color("black"), self, 1)

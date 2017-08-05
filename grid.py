@@ -22,6 +22,9 @@ class Grid(pygame.Rect):
 		
 		# Create list of cells that need to be drawn
 		self.cellsToRedraw = []
+		
+		# Create list of cells that need to be dead/alive
+		self.cellsToCalc = []
 	
 		# Create an array of cells
 		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
@@ -164,6 +167,9 @@ class Grid(pygame.Rect):
 		# Check to remove right columns
 		while self.cells[-1][-1].left > size.width:
 			self.removeColumn(-1)
+		
+		# Index all cells to match updated grid
+		self.indexGrid()
 	
 	def removeColumn(self, columnIndex):
 		self.cells.pop(columnIndex)
@@ -290,6 +296,9 @@ class Grid(pygame.Rect):
 		
 		# Set cell for redrawing
 		self.cellsToRedraw.append(cell)
+		if cell.alive:
+			self.cellsToCalc.append(cell)
+			cell.added = True
 		
 		return cell.alive
 	
@@ -311,8 +320,14 @@ class Grid(pygame.Rect):
 				break
 			except:
 				pass
-		
+
 		return Coordinates(x, y)
+		
+	def indexGrid(self):
+		for x in range(self.gridWidth):
+			for y in range(self.gridHeight):
+				self.cells[x][y].gridx = x
+				self.cells[x][y].gridy = y
 	
 
 # Subclass of Rect to add alive/dead status
@@ -322,7 +337,8 @@ class Cell(pygame.Rect):
 		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
 		self.alive=False
 		self.neighbors=[]
-	
+		self.added = False
+			
 	def resize(self, newSize):
 		self.width = newSize.width
 		self.height = newSize.height

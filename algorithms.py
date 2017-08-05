@@ -25,7 +25,7 @@ def calc_status(interface):
 		totalAliveNeighbors = 0
 
 		# Add neighbors of each cell
-		for neighbor in cell.neighbor:		
+		for neighbor in cell.neighbors:		
 			if neighbor.alive == True:
 				totalAliveNeighbors += 1
 				if totalAliveNeighbors > interface.populationLimit:

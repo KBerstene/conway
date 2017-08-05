@@ -293,7 +293,7 @@ class Grid(pygame.Rect):
 		
 		# Set cell for redrawing
 		self.cellsToRedraw.append(cell)
-		if cell.alive:
+		if cell.alive and cell.added == False:
 			self.cellsToCalc.append(cell)
 			cell.added = True
 		

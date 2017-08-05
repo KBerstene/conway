@@ -2,6 +2,7 @@
 
 import pygame
 from pygame.locals import *
+from time import time
 from algorithms import *
 from namedtuples import *
 from grid import Grid
@@ -16,17 +17,20 @@ class Interface():
 		self.simRunning = False
 		self.calcThread = calcThread
 			# Section sizes
-		# Control width is actually a bit flexible now.
-		# The value below is the max value it will reach.
-		# The minimum value it will reach is
-		# (self.control_width - cell size + 1)
-		# so large cells can squish it a bit.
 		self.control_width = 200
-	
-		# Declare variables
+    
+    # Declare variables
 		self.populationLimit = 3
 		self.populationMin = 2
 		self.generation = 0
+		
+		# Declare mouse event flags
+		self.processMouse = False
+		self.multiCellDrag = False
+		self.multiCellDragState = True
+		self.mouseHeld = False
+		self.mouseRepeatDelayed = False
+		self.mouseClickTime = 0
 		
 		# Initialize pygame window
 		pygame.init()
@@ -36,21 +40,21 @@ class Interface():
 		# Create clock to limit FPS
 		self.fpsClock = pygame.time.Clock()
 
-		# Enable key hold repeating and set limits
+		# Enable key and mouse hold repeating and set limits
 		pygame.key.set_repeat(500,75)
+		self.mouseRepeat = (500, 75)
 		
 		# Create the initial grid
 		self.grid = Grid(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
 		
 		# Create control section
 		self.controls = Controls(Dimensions(self.control_width, self.window.get_rect().height),
-								Position(self.grid.rect.width, 0), self)
-
-
-	def setCalcThread(self,calcThread):
-		self.calcThread = calcThread
-		self.controls.updateSpeedDisplay(self.calcThread.speed)
-		
+								Position(self.grid.width, 0), self)
+	
+	###########################################
+	# MAIN INTERFACE LOOP METHODS             #
+	###########################################
+	
 	def update(self):
 		# Process any mouse/keyboard events
 		if not self.processEvents():
@@ -68,25 +72,39 @@ class Interface():
 		self.fpsClock.tick(self.fpsLimit)
 		
 		return True
-		
+	
 	def processEvents(self):
 		click_pos=(-1,-1)
-
+		
 		# Get pygame events to see if/what key is pressed
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
 				return False
 			elif event.type == MOUSEBUTTONDOWN:
-				if event.button == 1: # Left click
-					self.controls.collidepoint(pygame.mouse.get_pos())
-					self.grid.collidepoint(pygame.mouse.get_pos())
+				if event.button <= 3: # Left, middle, or right click get special processing
+					# Turn mouse processing on
+					self.processMouse = True
+					# Pretend like the delay has gone through so
+					# the first click will process
+					self.mouseRepeatDelayed = True
+					# Set a very long time in the future so the interval will process
+					self.mouseClickTime = time() + time()
 				elif event.button == 4: # Scroll wheel up
 					self.zoomIn(pygame.mouse.get_pos()) # Zoom in
 				elif event.button == 5: # Scroll wheel down
 					self.zoomOut(pygame.mouse.get_pos()) # Zoom out
 				else:
 					pass
+			elif event.type == MOUSEBUTTONUP:
+				# Turn mouse processing off
+				self.processMouse = False
+				# Reset mouse flags
+				self.multiCellDrag = False
+				self.mouseHeld = False
+			elif event.type == MOUSEMOTION:
+				if self.processMouse:
+					self.multiCellDrag = True
 			elif event.type == KEYDOWN:
 				mods = pygame.key.get_mods()# Get modifier keys
 				if event.key == K_LEFT:
@@ -113,7 +131,87 @@ class Interface():
 				self.resize(event.dict['size'])
 			else:
 				pass
+		
+		if self.processMouse:
+			self.processMouseEvents()
 		return True
+	
+	def processMouseEvents(self):
+		# Get current time
+		currentTime = time()
+
+		###########################################################
+		# Process mouse events that only happen once              #
+		###########################################################
+		
+		if not self.mouseHeld:
+			if pygame.mouse.get_pressed()[0]: # Left click
+				if self.controls.collidepoint(pygame.mouse.get_pos()):
+					pass
+			if pygame.mouse.get_pressed()[1]: # Middle click
+				pass
+			if pygame.mouse.get_pressed()[2]: # Right click
+				pass
+		
+		###########################################################
+		# Process instantly repeated mouse events                 #
+		###########################################################
+		
+		if pygame.mouse.get_pressed()[0]: # Left click
+			if self.grid.collidepoint(pygame.mouse.get_pos()):
+				if not self.mouseHeld:
+					# Activate the cell to change its alive status
+					# We want to be able to drag its new status onto other cells
+					self.multiCellDragState = self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+				elif self.multiCellDrag:
+					# If we are trying to bring multiple cells to life,
+					# then check the clicked cell's alive state before
+					# clicking on it.
+					if self.grid.getCell(pygame.mouse.get_pos()).alive != self.multiCellDragState:
+						self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+		if pygame.mouse.get_pressed()[1]: # Middle click
+			pass
+		if pygame.mouse.get_pressed()[2]: # Right click
+			pass
+		
+		###########################################################
+		# Process mouse events that repeat, but need delay        #
+		###########################################################
+		
+		# See if delay is needed
+		if self.mouseHeld:
+			# Has enough time passed since the first delay?
+			if (not self.mouseRepeatDelayed) and (currentTime - self.mouseClickTime < (self.mouseRepeat[0]/1000)):
+				return
+		
+			# Enough time has passed since the first delay, skip delay check next time
+			self.mouseRepeatDelayed = True
+		
+			# Has enough time passed for another repeat to happen?
+			if currentTime - self.mouseClickTime < (self.mouseRepeat[1]/1000):
+				return
+		
+		# Process events for the first time and
+		# after the appropriate delay interval
+		if pygame.mouse.get_pressed()[0]: # Left click
+			pass
+		if pygame.mouse.get_pressed()[1]: # Middle click
+			pass
+		if pygame.mouse.get_pressed()[2]: # Right click
+			pass
+		
+		###########################################################
+		# Turn on mouseHeld flag so the next time this processes  #
+		# it will know that we've been holding it down            #
+		# and how long we've been holding it down                 #
+		###########################################################
+		
+		self.mouseHeld = True
+		self.mouseClickTime = currentTime
+
+	###########################################
+	# DRAWING AND SIZE MANIPULATION METHODS   #
+	###########################################
 	
 	def draw(self):
 		# Set list of rects that will be updated and returned
@@ -122,65 +220,20 @@ class Interface():
 		# Draw grid
 		updateList.extend(self.grid.draw(self.window))
 		
+		# See if any cells that need draw updates collide with
+		# any controls, and set those controls to redraw as well
+		self.controls.checkGridOverlap(updateList)
+		
 		# Draw control interface
 		updateList.extend(self.controls.draw(self.window))
 		
 		# Return list of rects to be updated
 		return updateList
-
-	def reset(self):
-		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
-		self.calcThread.__init__(self)
-
-	#################################
-	# Simulation speed manipulation #
-	#################################
-	def pause(self):
-		self.simRunning = not(self.simRunning)
-		self.controls.updateStatusDisplay(self.simRunning)
-
-	def speedUp(self):
-		self.calcThread.speed += 1
-		self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
-	def speedDown(self):
-		if (self.calcThread.speed > 1):
-			self.calcThread.speed -= 1
-			self.controls.updateSpeedDisplay(self.calcThread.speed)
-	
-	def popLimitUp(self):
-		if self.populationLimit < 8:
-			self.populationLimit += 1
-			self.controls.updatePopLimitDisplay(self.populationLimit)
-	
-	def popLimitDown(self):
-		if self.populationLimit > 1:
-			self.populationLimit -= 1
-			self.controls.updatePopLimitDisplay(self.populationLimit)
-			
-	def popMinUp(self):
-		if self.populationMin < 8:
-			self.populationMin += 1
-			self.controls.updatePopMinDisplay(self.populationMin)
-			
-	def popMinDown(self):
-		if self.populationMin > 1:
-			self.populationMin -= 1
-			self.controls.updatePopMinDisplay(self.populationMin)
-	
-	def stepForward(self):
-		if self.simRunning:
-			self.pause()
-		self.calcThread.calc()
-		return self.simRunning
-	
-	################################
-	# Visual size manipulation     #
-	################################
 	def resize(self, size):
 		self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
 		self.grid.resize(Dimensions(self.window.get_rect().width - self.control_width, self.window.get_rect().height), Position(0, 0))
-		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.rect.width, 0))
+		self.controls.resize(Dimensions(self.control_width, self.window.get_rect().height), Position(self.grid.width, 0))
 	
 	def zoomIn(self, pos, sizeChange = 2):
 		##############################################
@@ -249,13 +302,67 @@ class Interface():
 		
 		self.grid.autoAddRemoveCells()
 	
-		#########################################
-		# Schedule entire grid for redrawing    #
-		#########################################
+		############################################
+		# Schedule controls and grid for redrawing #
+		############################################
 		
+		self.controls.redrawAll()
 		self.grid.redrawAll()
 	
 	def zoomOut(self, pos, sizeChange = 2):
 		# Do everything zoom out does,
 		# but with negative sizeChange
 		self.zoomIn(pos, 0 - sizeChange)
+	
+	##################################################
+	# SIMULATION CONTROLS AND PARAMETER MANIPULATION #
+	##################################################
+	
+	def pause(self):
+		self.simRunning = not(self.simRunning)
+		self.controls.updateStatusDisplay(self.simRunning)
+	
+	def popLimitDown(self):
+		if self.populationLimit > 1:
+			self.populationLimit -= 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+			
+	def popLimitUp(self):
+		if self.populationLimit < 8:
+			self.populationLimit += 1
+			self.controls.updatePopLimitDisplay(self.populationLimit)
+	
+	def popMinDown(self):
+		if self.populationMin > 1:
+			self.populationMin -= 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+	
+	def popMinUp(self):
+		if self.populationMin < 8:
+			self.populationMin += 1
+			self.controls.updatePopMinDisplay(self.populationMin)
+			
+	def reset(self):
+		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
+		self.calcThread.__init__(self)
+		self.grid.indexGrid()
+	
+	def setCalcThread(self,calcThread):
+		self.calcThread = calcThread
+		self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def speedDown(self):
+		if (self.calcThread.speed > 1):
+			self.calcThread.speed -= 1
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def speedUp(self):
+		self.calcThread.speed += 1
+		self.controls.updateSpeedDisplay(self.calcThread.speed)
+	
+	def stepForward(self):
+		if self.simRunning:
+			self.pause()
+		self.calcThread.calc()
+		return self.simRunning
+	

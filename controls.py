@@ -27,6 +27,73 @@ class Controls():
 		self.controls = []
 		self.populateItems()
 	
+	###########################################
+	# DRAWING AND SIZE MANIPULATION METHODS   #
+	###########################################
+	
+	def checkGridOverlap(self, cellList):
+		for control in self.controls:
+			if control.collidelist(cellList) != -1:
+				self.controlsToRedraw.append(control)
+	
+	def draw(self, surface):
+		# Set list of rects that will be updated and returned
+		updateList = []
+		
+		# Draw control items
+		for item in self.controlsToRedraw:
+			item.draw(surface)
+			updateList.append(item.get_rect())
+			
+		# Clear list of drawn items
+		self.controlsToRedraw.clear()
+		
+		# Return list of rects to be updated on surface
+		return updateList
+	
+	def redrawAll(self):
+		self.controlsToRedraw.extend(self.controls)
+	
+	def resize(self, size, position):
+		# Resize surface
+		self.surface = pygame.transform.scale(self.surface, size)
+		self.rect = self.surface.get_rect(left=position.left, top=position.top)
+		
+		# Regenerate control items
+		self.controls.clear()
+		self.populateItems()
+		self.updateStatusDisplay(self.interface.simRunning)
+		self.updateSpeedDisplay(self.interface.calcThread.speed)
+		self.updatePopLimitDisplay(self.interface.populationLimit)
+		self.updatePopMinDisplay(self.interface.populationMin)
+		self.updateGenerationDisplay(self.interface.generation)
+	
+	###########################################
+	# CONTROL CREATION METHODS                #
+	###########################################
+	
+	def addControl(self, objectList):
+		if (len(self.controls) == 0):
+			self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, objectList))
+		else:
+			self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, objectList))
+		
+		# Add to list for initial draw
+		self.controlsToRedraw.append(self.controls[-1])
+	
+	def addControlPadding(self):
+		# The bottom of the last object is the top of the final padding
+		top = self.controls[len(self.controls) - 1].top + self.controls[len(self.controls) - 1].height
+		left = self.rect.left
+		width = self.rect.width
+		height = self.rect.height - top
+		
+		paddingRect = Rectangle((left, top), (width, height))
+		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
+		
+		# Add to list for initial draw
+		self.controlsToRedraw.append(self.controls[-1])
+	
 	def populateItems(self):
 		# Add controls
 			# Start Button
@@ -62,42 +129,21 @@ class Controls():
 		self.popLimitDisplay.wrapper = self.controls[6]
 		self.popMinDisplay.wrapper = self.controls[8]
 	
-	def addControl(self, objectList):
-		if (len(self.controls) == 0):
-			self.controls.append(ControlWrapper(Position(self.rect.left, self.rect.top), self.rect.width, objectList))
-		else:
-			self.controls.append(ControlWrapper(Position(self.rect.left, self.controls[len(self.controls)-1].top + self.controls[len(self.controls)-1].height), self.rect.width, objectList))
-		
-		# Add to list for initial draw
-		self.controlsToRedraw.append(self.controls[-1])
-			
-	def addControlPadding(self):
-		# The bottom of the last object is the top of the final padding
-		top = self.controls[len(self.controls) - 1].top + self.controls[len(self.controls) - 1].height
-		left = self.rect.left
-		width = self.rect.width
-		height = self.rect.height - top
-		
-		paddingRect = Rectangle((left, top), (width, height))
-		self.controls.append(ControlWrapper(Position(self.rect.left, top), self.rect.width, [ paddingRect ]))
-		
-		# Add to list for initial draw
-		self.controlsToRedraw.append(self.controls[-1])
+	###########################################
+	# CONTROL DISPLAY UPDATE METHODS          #
+	###########################################
 	
-	def draw(self, surface):
-		# Set list of rects that will be updated and returned
-		updateList = []
+	def updateGenerationDisplay(self, generation):
+		self.generationDisplay.setText(str(generation))
 		
-		# Draw control items
-		for item in self.controlsToRedraw:
-			item.draw(surface)
-			updateList.append(item.get_rect())
-			
-		# Clear list of drawn items
-		self.controlsToRedraw.clear()
-		
-		# Return list of rects to be updated on surface
-		return updateList
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.generationDisplay.wrapper)
+	
+	def updateSpeedDisplay(self, speed):
+		self.speedDisplay.setText(str(speed))
+
+		# Add to list for redraw
+		self.controlsToRedraw.append(self.speedDisplay.wrapper)
 	
 	def updateStatusDisplay(self, simRunning):
 		if simRunning:
@@ -108,30 +154,18 @@ class Controls():
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.simStatusDisplay.wrapper)
 	
-	def updateSpeedDisplay(self, speed):
-		self.speedDisplay.setText(str(speed))
-
-		# Add to list for redraw
-		self.controlsToRedraw.append(self.speedDisplay.wrapper)
-		
-	def updateGenerationDisplay(self, generation):
-		self.generationDisplay.setText(str(generation))
-		
-		# Add to list for redraw
-		self.controlsToRedraw.append(self.generationDisplay.wrapper)
-		
 	def updatePopLimitDisplay(self, poplimit):
 		self.popLimitDisplay.setText(str(poplimit))
 		
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.popLimitDisplay.wrapper)
-		
+	
 	def updatePopMinDisplay(self, popMin):
 		self.popMinDisplay.setText(str(popMin))
 		
 		# Add to list for redraw
 		self.controlsToRedraw.append(self.popMinDisplay.wrapper)
-		
+	
 	def collidepoint(self, pos):
 		if self.rect.collidepoint(pos):
 			for item in self.controls:
@@ -139,24 +173,10 @@ class Controls():
 					item.clickAction()
 					break
 	
-	def resize(self, size, position):
-		# Resize surface
-		self.surface = pygame.transform.scale(self.surface, size)
-		self.rect = self.surface.get_rect(left=position.left, top=position.top)
-		
-		# Regenerate control items
-		self.controls.clear()
-		self.populateItems()
-		self.updateStatusDisplay(self.interface.simRunning)
-		self.updateSpeedDisplay(self.interface.calcThread.speed)
-		self.updatePopLimitDisplay(self.interface.populationLimit)
-		self.updatePopMinDisplay(self.interface.populationMin)
-		self.updateGenerationDisplay(self.interface.generation)
-		
 
 # Wrapper class for all control objects
 # This is here to allow for padding and dynamic sizing of control objects
-class ControlWrapper():
+class ControlWrapper(pygame.Surface):
 	# Constructor
 	def __init__(self, pos, width, objectList, padding = 5, click = lambda:None):
 		# Create object list
@@ -168,16 +188,15 @@ class ControlWrapper():
 			if obj.height > maxHeight:
 				maxHeight = obj.height
 		
-		# Create surface
-		self.surface = pygame.Surface((width, maxHeight + padding + padding)) # add padding twice to cover both top and bottom padding
-		self.surface.fill(pygame.Color("white"))
+		# Call surface init
+		super().__init__((width, maxHeight + padding + padding)) # add padding twice to cover both top and bottom padding
 		
 		# Create size constants
 		self.pos = pos
 		self.left = pos.left
 		self.top = pos.top
 		self.width = width
-		self.height = self.surface.get_rect().height
+		self.height = self.get_rect().height
 		
 		# Get amount of extra width around objects
 		spareWidth = width - padding # Initial left padding
@@ -194,31 +213,31 @@ class ControlWrapper():
 			self.objects[i].left = leftPadding + padding
 			# Set new left
 			leftPadding = self.objects[i].left + self.objects[i].width
-			
-		# Draw objects
-		for obj in self.objects:
-			obj.draw(self.surface)
-
+	
 	def draw(self, surface):
 		# Reset surface to white
-		self.surface.fill(pygame.Color("white"))
+		super().fill(pygame.Color("white"))
 		
 		# Draw objects onto control surface
 		for obj in self.objects:
-			obj.draw(self.surface)
+			obj.draw(self)
 		
 		# Draw control surface
-		surface.blit(self.surface, self.pos)
+		surface.blit(self, self.pos)
 	
 	def collidepoint(self, pos):
-		for obj in self.objects:
-			if obj.collidepoint((pos[0] - self.pos[0], pos[1] - self.pos[1])):
-				self.clickAction = obj.clickAction
-				return True
+		if self.get_rect().collidepoint(pos):
+			for obj in self.objects:
+				if obj.collidepoint((pos[0] - self.pos[0], pos[1] - self.pos[1])):
+					self.clickAction = obj.clickAction
+					return True
 		return False
 	
+	def collidelist(self, list):
+		return self.get_rect().collidelist(list)
+	
 	def get_rect(self):
-		return self.surface.get_rect(left = self.pos[0], top = self.pos[1])
+		return super().get_rect(left = self.pos[0], top = self.pos[1])
 		
 # Blank rectangle that can self-draw
 class Rectangle(pygame.Rect):

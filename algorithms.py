@@ -18,16 +18,16 @@ def calc_status(interface):
 	# Create array of new alive/dead stats
 	tempGrid = [[False for x in range(gridHeight)] for x in range(gridLength)]
 	
-	# Iterate through list of cells to add neighbors to temp list
+	# Iterate through list of cells to add neighbors to temp list if they are not in either list
 	for cell in cellsToCalc:
 		for z in range (len(cells[cell.gridx][cell.gridy].neighbors)):
-			neighborsToCalc.append(cells[cell.gridx][cell.gridy].neighbors[z])
+			if cells[cell.gridx][cell.gridy].neighbors[z].added == False:
+				cell.added = True
+				neighborsToCalc.append(cells[cell.gridx][cell.gridy].neighbors[z])
 			
-	# Iterate through temp list to check for duplicates and add cells to cellsToCalc
+	# Iterate through temp list to add cells to cellsToCalc
 	for cell in neighborsToCalc:
-		if cell.added == False:
-			cell.added = True
-			cellsToCalc.append(cell)
+		cellsToCalc.append(cell)
 	
 	# Iterate through cells to see what needs to be changed
 	for cell in cellsToCalc:

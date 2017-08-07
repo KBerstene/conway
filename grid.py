@@ -66,6 +66,9 @@ class Grid(pygame.Rect):
 		for cell in self.cellsToRedraw:
 			updateList.append(cell.draw(surface))
 		
+		# Clear cells to redraw
+		self.cellsToRedraw.clear()
+		
 		# Pass whole grid rect and reset flags if needed
 		if self.redrawAll or self.redrawGrid:
 			self.redrawAll = False
@@ -74,32 +77,6 @@ class Grid(pygame.Rect):
 		
 		return updateList
 		
-		
-		#################
-		#      OLD      #
-		#################
-		
-		# Set list of rects that will be updated and returned
-		updateList = []
-		
-		# Iterate through cells that need to be redrawn
-		for cell in self.cellsToRedraw:
-			if cell.alive:
-				# If it's alive, fill a solid black rectangle
-				surface.fill(pygame.Color("black"), cell)
-			else:
-				# If it's dead, draw white and then the outline
-				surface.fill(pygame.Color("white"), cell)
-				pygame.draw.rect(surface, pygame.Color("black"), cell, 1)
-			
-			# Add cell to list to be updated
-			updateList.append(cell)
-		
-		# Clear list of cells to be redrawn
-		self.cellsToRedraw.clear()
-		
-		# Return list of rects to be updated on surface
-		return updateList
 	
 	def redrawAll(self):
 		self.redrawAll = True

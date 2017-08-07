@@ -159,16 +159,20 @@ class Interface():
 		
 		if pygame.mouse.get_pressed()[0]: # Left click
 			if self.grid.collidepoint(pygame.mouse.get_pos()):
+				clickedCell = self.grid.getCell(pygame.mouse.get_pos())
+				if clickedCell == None:
+					clickedCell = self.grid.createCell(pygame.mouse.get_pos())
+				
 				if not self.mouseHeld:
 					# Activate the cell to change its alive status
 					# We want to be able to drag its new status onto other cells
-					self.multiCellDragState = self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+					self.multiCellDragState = self.grid.clickCell(clickedCell)
 				elif self.multiCellDrag:
 					# If we are trying to bring multiple cells to life,
 					# then check the clicked cell's alive state before
 					# clicking on it.
-					if self.grid.getCell(pygame.mouse.get_pos()).alive != self.multiCellDragState:
-						self.grid.clickCell(self.grid.getCell(pygame.mouse.get_pos()))
+					if clickedCell.alive != self.multiCellDragState:
+						self.grid.clickCell(clickedCell)
 		if pygame.mouse.get_pressed()[1]: # Middle click
 			pass
 		if pygame.mouse.get_pressed()[2]: # Right click

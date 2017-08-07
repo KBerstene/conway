@@ -6,43 +6,79 @@ from namedtuples import *
 
 class Grid(pygame.Rect):
 	# Constructor
-	def __init__(self, dimensions, location, cellSize = Dimensions(21,21)):
+	def __init__(self, dimensions, location, cellSize = Dimensions(20,20)):
+		# Call Rect constructor
+		super().__init__(location.left, location.top, dimensions.width, dimensions.height)
+		
 		# Calculate size of grid
 		self.cellSize = cellSize
 		self.gridWidth = math.ceil((dimensions.width - 1) / (self.cellSize.width - 1))
 		self.gridHeight = math.ceil((dimensions.height - 1) / (self.cellSize.height - 1))
 
-		# Call Rect constructor
-		super().__init__(location.left, location.top, dimensions.width, dimensions.height)
-		
 		# Create constants
-		self.cellSize = cellSize
 		self.minSize = Dimensions(5,5)
 		self.maxSize = Dimensions(100, 100)
+		
+		# Create array of grid lines and populate
+		# with first horizontal and vertical lines
+		self.gridLines = [[((0, 0), (self.width, 0))], [((0, 0), (0, self.height))]]
+		
+		# Create grid lines
+		self.addLines()
+		
+		# Create dict for cells to be called by coordinates
+		self.cells = {}
 		
 		# Create list of cells that need to be drawn
 		self.cellsToRedraw = []
 		
 		# Create list of cells that need to be dead/alive
 		self.cellsToCalc = []
-	
-		# Create an array of cells
-		self.cells = [[Cell() for x in range(self.gridHeight)] for x in range(self.gridWidth)]
 		
-		# Set each square's position
-		for i in range(self.gridWidth):
-			for j in range(self.gridHeight):
-				self.cells[i][j] = Cell(Position((i*(self.cellSize.width - 1)) + self.left, (j*(self.cellSize.height - 1)) + self.top), size = self.cellSize)
-				self.cellsToRedraw.append(self.cells[i][j])
-
-		# Create each cell's neighbors list
-		self.createCellNeighbors()
+		# Create redraw flags
+		self.redrawAll = True
+		self.redrawGrid = True
 	
 	###########################################
 	# DRAWING METHODS                         #
 	###########################################
 	
 	def draw(self, surface):
+		# Set list of sections to be update
+		updateList = []
+	
+		# Check if everything should be redrawn
+		if self.redrawAll:
+			# Fill background
+			surface.fill(pygame.Color("grey"))
+			# Tell grid to redraw
+			self.redrawGrid = True
+			# Tell cells to redraw
+			pass
+		
+		# Check to redraw grid lines
+		if self.redrawGrid:
+			for lines in self.gridLines:
+				for gridLine in lines:
+					pygame.draw.polygon(surface, pygame.Color("black"), gridLine, 1)
+		
+		# Check cells to redraw
+		for cell in self.cellsToRedraw:
+			updateList.append(cell.draw(surface))
+		
+		# Pass whole grid rect and reset flags if needed
+		if self.redrawAll or self.redrawGrid:
+			self.redrawAll = False
+			self.redrawGrid = False
+			updateList = [self]
+		
+		return updateList
+		
+		
+		#################
+		#      OLD      #
+		#################
+		
 		# Set list of rects that will be updated and returned
 		updateList = []
 		
@@ -66,14 +102,32 @@ class Grid(pygame.Rect):
 		return updateList
 	
 	def redrawAll(self):
-		for row in self.cells:
-			for cell in row:
-				self.cellsToRedraw.append(cell)
+		self.redrawAll = True
 	
 	###########################################
 	# GRID SIZE MANIPULATION METHODS          #
 	###########################################
 	
+	def addLines(self):
+		#################################################
+		# A note on the ordering of gridline arrays:    #
+		# The four parts, in order, are:                #
+		#   0: Horizontal lines; 1: Vertical lines      #
+		#   Index of the tuple of line coordinates      #
+		#   The set of coordinates (2 per line)         #
+		#   0: x-coordinate; 1: y-coordinate            #
+		#################################################
+	
+		# Add horizontal
+		while self.gridLines[0][-1][0][1] < self.height:
+			nextTop = self.gridLines[0][-1][0][1] + self.cellSize.height
+			self.gridLines[0].append(((0, nextTop), (self.width, nextTop)))
+		
+		# Add vertical
+		while self.gridLines[1][-1][0][0] < self.width:
+			nextLeft = self.gridLines[1][-1][0][0] + self.cellSize.width
+			self.gridLines[1].append(((nextLeft, 0), (nextLeft, self.height)))
+		
 	def addColumn(self, prepend = False):
 		# Grid gets one wider
 		self.gridWidth = self.gridWidth + 1
@@ -182,6 +236,9 @@ class Grid(pygame.Rect):
 		self.gridHeight = self.gridHeight - 1
 	
 	def resize(self, size, location):
+		# Currently not working
+		return
+		
 		# Add and remove cells that have moved on or off screen
 		self.autoAddRemoveCells(size)
 		
@@ -197,6 +254,49 @@ class Grid(pygame.Rect):
 	###########################################
 	# NEIGHBOR CREATION METHODS               #
 	###########################################
+	
+	def createCell(self, pos):
+		# Locate cell position on screen
+		posx = math.floor(pos[0]/self.cellSize.width)
+		posy = math.floor(pos[1]/self.cellSize.height)
+		
+		# Find cell grid coordinates
+		if len(self.cells) == 0:
+			x = 0
+			y = 0
+		else:
+			origin = self.cells[(0,0)].center
+			xDiff = pos[0] - origin[0]
+			yDiff = pos[1] - origin[1]
+			
+			x = round(xDiff / self.cellSize.width)
+			y = round(yDiff / self.cellSize.height)
+			
+		# Create new cell
+		newCell = Cell(Coordinates(x, y), Position(posx * self.cellSize.width, posy * self.cellSize.height), self.cellSize)
+		
+		# Add cell to list and dict
+		self.cells[(x, y)] = newCell
+		
+		# Set new cell to redraw
+		self.cellsToRedraw.append(newCell)
+		
+		return newCell
+
+	def createNeighbors(self, cell):
+		cell.neighbors = []
+		
+		for j in range(-1, 2):
+			for i in range (-1, 2):
+				relativeCoords = (cell.coords[0] + i, cell.coords[1] + j)
+				if relativeCoords in self.cells:
+					cell.neighbors.append(self.cells[relativeCoords])
+				else:
+					self.createCell(pos = (cell.centerx + (self.cellSize.width * i), cell.centery + (self.cellSize.height * j)))
+					cell.neighbors.append(self.cells[relativeCoords])
+		
+		# Remove the cell itself as a neighbor
+		cell.neighbors.pop(4)
 	
 	def createCellNeighbors(self):
 		for i in range(self.gridWidth):
@@ -291,21 +391,29 @@ class Grid(pygame.Rect):
 		# Flip cell's alive status
 		cell.alive = not cell.alive
 		
+		# Check if cell has neighbors yet
+		if not cell.neighborsAdded:
+			self.createNeighbors(cell)
+			cell.neighborsAdded = True
+		
 		# Set cell for redrawing
 		self.cellsToRedraw.append(cell)
-		if cell.alive and cell.added == False:
+		
+		# Set cell for recalculation
+		if not cell.added:
 			self.cellsToCalc.append(cell)
 			cell.added = True
 		
 		return cell.alive
 	
 	def getCell(self, pos):
-		if self.collidepoint(pos):
-			for row in self.cells:
-				for cell in row:
-					if cell.collidepoint(pos):
-						return cell
-		return None
+		cellList = list(self.cells.values())
+		index = pygame.Rect(pos, (0,0)).collidelist(cellList)
+		
+		if index == -1:
+			return None
+		else:
+			return self.cells[cellList[index].coords]
 	
 	def getCellIndex(self, cell):
 		for row in self.cells:
@@ -327,16 +435,35 @@ class Grid(pygame.Rect):
 				self.cells[x][y].gridy = y
 	
 
-# Subclass of Rect to add alive/dead status
 class Cell(pygame.Rect):
 	# Constructor
-	def __init__(self, pos=Position(0, 0), size=Dimensions(21, 21)):
-		super(Cell, self).__init__((pos.left, pos.top), (size.width, size.height))
+	def __init__(self, coords = Coordinates(0, 0), pos = Position(0, 0), size = Dimensions(0, 0)):
+		# Rect collision ignores their 1px borders, so the cell has to be slightly larger
+		# than its border and have a rectangle that needs to be drawn slightly smaller
+		# than its border
+		super().__init__((pos.left - 1, pos.top - 1), (size.width + 2, size.height + 2))
+		self.drawableRect = pygame.Rect((pos.left + 1, pos.top + 1), (size.width - 1, size.height - 1))
+		
+		# Grid coordinates
+		self.coords = coords
+		
+		# Variables
 		self.alive = False
 		self.neighbors = []
+		self.neighborsAdded = False
 		self.added = False
 		self.tempAlive = False
-			
+	
+	def draw(self, surface):
+		if self.alive:
+			color = "black"
+		else:
+			color = "white"
+		
+		surface.fill(pygame.Color(color), self.drawableRect)
+		
+		return self.drawableRect
+	
 	def resize(self, newSize):
 		self.width = newSize.width
 		self.height = newSize.height

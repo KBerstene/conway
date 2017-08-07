@@ -283,7 +283,7 @@ class Grid(pygame.Rect):
 		
 		return newCell
 
-	def createNeighbors(self, cell):
+	def createNeighbors(self, cell, createNewCells = True):
 		cell.neighbors = []
 		
 		for j in range(-1, 2):
@@ -292,11 +292,23 @@ class Grid(pygame.Rect):
 				if relativeCoords in self.cells:
 					cell.neighbors.append(self.cells[relativeCoords])
 				else:
-					self.createCell(pos = (cell.centerx + (self.cellSize.width * i), cell.centery + (self.cellSize.height * j)))
-					cell.neighbors.append(self.cells[relativeCoords])
+					if createNewCells:
+						self.createCell(pos = (cell.centerx + (self.cellSize.width * i), cell.centery + (self.cellSize.height * j)))
+						cell.neighbors.append(self.cells[relativeCoords])
+		
+		# Once neighbors are created, check each of them
+		# to see if they need to update their neighbors list
+		if createNewCells:
+			for neighbor in cell.neighbors:
+				if not neighbor.neighborsAdded:
+					self.createNeighbors(neighbor, createNewCells = False)
 		
 		# Remove the cell itself as a neighbor
-		cell.neighbors.pop(4)
+		try:
+			cellSelfIndex = cell.neighbors.index(cell)
+			cell.neighbors.pop(cellSelfIndex)
+		except ValueError:
+			pass
 	
 	def createCellNeighbors(self):
 		for i in range(self.gridWidth):

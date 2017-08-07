@@ -345,7 +345,6 @@ class Interface():
 	def reset(self):
 		self.__init__(Dimensions(self.window.get_rect().width, self.window.get_rect().height), self.calcThread)
 		self.calcThread.__init__(self)
-		self.grid.indexGrid()
 	
 	def setCalcThread(self,calcThread):
 		self.calcThread = calcThread

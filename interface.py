@@ -363,8 +363,9 @@ class Interface():
 			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def speedUp(self):
-		self.calcThread.speed += 1
-		self.controls.updateSpeedDisplay(self.calcThread.speed)
+		if(self.calcThread.speed < 21):
+			self.calcThread.speed += 1
+			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def stepForward(self):
 		if self.simRunning:

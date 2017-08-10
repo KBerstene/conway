@@ -19,13 +19,6 @@ class Grid(pygame.Rect):
 		self.minSize = Dimensions(5,5)
 		self.maxSize = Dimensions(100, 100)
 		
-		# Create array of grid lines
-		self.gridLines = []
-		
-		
-		# Create grid lines
-		self.addLines()
-		
 		# Create dict for cells to be called by coordinates
 		self.cells = {}
 		
@@ -34,6 +27,12 @@ class Grid(pygame.Rect):
 		
 		# Create list of cells that need to be dead/alive
 		self.cellsToCalc = []
+		
+		# Create array of grid lines
+		self.gridLines = []
+		
+		# Create grid lines
+		self.addLines()
 		
 		# Create redraw flags
 		self.redrawAll = True
@@ -63,8 +62,8 @@ class Grid(pygame.Rect):
 					pygame.draw.polygon(surface, pygame.Color("black"), gridLine, 1)
 		
 		# Check cells to redraw
-		for cell in self.cellsToRedraw:
-			updateList.append(cell.draw(surface))
+		for index in surface.get_rect().collidelistall(self.cellsToRedraw):
+			updateList.append(self.cellsToRedraw[index].draw(surface))
 		
 		# Clear cells to redraw
 		self.cellsToRedraw.clear()
@@ -82,18 +81,26 @@ class Grid(pygame.Rect):
 	###########################################
 	
 	def addLines(self):
-		#################################################
-		# A note on the ordering of gridline arrays:    #
-		# The four parts, in order, are:                #
-		#   0: Horizontal lines; 1: Vertical lines      #
-		#   Index of the tuple of line coordinates      #
-		#   The set of coordinates (2 per line)         #
-		#   0: x-coordinate; 1: y-coordinate            #
-		#################################################
+		###################################################
+		# A note on the ordering of gridline arrays:      #
+		# The four parts, in order, are:                  #
+		#   0: Horizontal lines; 1: Vertical lines        #
+		#   0-len: Index of the tuple of line coordinates #
+		#   0-1: The set of coordinates (2 per line)      #
+		#   0: x-coordinate; 1: y-coordinate              #
+		###################################################
 		
-		# Populate gridLines array with the
-		# first horizontal and vertical lines
-		self.gridLines = [[((0, 0), (self.width, 0))], [((0, 0), (0, self.height))]]
+		# Find position of origin cell
+		try:
+			originCellPos = (self.cells[(0,0)].left + 1, self.cells[(0,0)].top +  1)
+		except KeyError:
+			# If no cells yet, set origin cell's position as (0,0)
+			# as though the cell had been placed in the top left corner
+			originCellPos = (0,0)
+		
+		# Set initial two gridlines relative to origin cell's position
+		posOffset = (originCellPos[0]%self.cellSize[0], originCellPos[1]%self.cellSize[1])
+		self.gridLines = [[((0, posOffset[1]), (self.width - 1, posOffset[1]))], [((posOffset[0], 0), (posOffset[0], self.height - 1))]]
 		
 		# Add horizontal
 		while self.gridLines[0][-1][0][1] < self.height - 1:
@@ -224,43 +231,125 @@ class Grid(pygame.Rect):
 		
 		# Schedule all cells for redrawAll
 		self.redrawAll = True
+		
+	def zoom(self, pos, sizeChange = 2):
+		##############################################
+		# Get necessary constants for error checking #
+		##############################################
+		
+		# Find the new size of the cell
+		newSize = Dimensions(self.cellSize.width + sizeChange, self.cellSize.height + sizeChange)
+		
+		# Get the cell that was zoomed in on
+		zoomedCell = self.getCell(pos)
+		
+		############################################
+		# Make sure that this zoom action is valid #
+		############################################
+		
+		# Make sure we're not going outside of size limits
+		if (newSize <= self.minSize) or (newSize >= self.maxSize):
+			return
+		# If no cell was zoomed in on, quit now
+		if zoomedCell == None:
+			return
+		
+		########################################
+		# Calculate new cell position based on #
+		# current mouse location               #
+		########################################
+		
+		# Find position of cursor relative to the cell (should be from 0 to cell width)
+		relativePos = Position(pos[0] - (zoomedCell.left + 1), pos[1] - (zoomedCell.top + 1))
+		# Find the ratio between the relative pos and the cell size
+		posRatio = Position(relativePos.left/self.cellSize.width, relativePos.top/self.cellSize.height)
+		# Calculate the new position of the cell.
+		newPos = Position((zoomedCell.left + 1) - (posRatio.left*sizeChange), (zoomedCell.top + 1) - (posRatio.top*sizeChange))
+	
+		#######################################
+		# Move and resize all cells in grid   #
+		# based on zoomed cell's new location #
+		#######################################
+		
+		# Find the index of the cell that was zoomed on
+		index = zoomedCell.coords # Returns a tuple with the x/y position in the cell array
+		
+		# Using the index, we can calculate how far away the cells should be from the zoomed cell.
+		# While we're iterating through, we also resize each cell (so we only iterate once).
+		for cell in self.cells.values():
+				#cell.resize(newSize)
+				#cell.move(Position(newPos.left - ((newSize.width)*(index.x - cell.coords.x)), newPos.top - ((newSize.height)*(index.y - cell.coords.y))))
+				cell.resizeAndMove(Position(newPos.left - ((newSize.width)*(index.x - cell.coords.x)), newPos.top - ((newSize.height)*(index.y - cell.coords.y))), newSize)
+				
+				# This is supposed to fix a minor cell-wall-width variation I only see in the top row or left column
+				# 2017-07-17 Kevin T. Berstene
+				#if cell.x <= 0:
+				#	cell.move(Position(cell.x - 1, cell.y))
+				#if cell.y <= 0:
+				#	cell.move(Position(cell.x, cell.y - 1))
+		
+		# Set new grid cellSize
+		# This needs to be done before adding cells
+		# so any added cells will be of the right size
+		self.cellSize = newSize
+		
+		###################################
+		# Recreate grid lines at new size #
+		###################################
+		
+		self.addLines()
 	
 	###########################################
 	# NEIGHBOR CREATION METHODS               #
 	###########################################
 	
 	def createCell(self, pos, coords = None):
-		# Locate cell position on screen
-		posx = math.floor(pos[0]/self.cellSize.width)
-		posy = math.floor(pos[1]/self.cellSize.height)
-		
-		# Find cell grid coordinates
-		if coords == None:
-			if len(self.cells) == 0:
-				x = 0
-				y = 0
-			else:
-				origin = self.cells[(0,0)].center
-				xDiff = pos[0] - origin[0]
-				yDiff = pos[1] - origin[1]
-				
-				x = round(xDiff / self.cellSize.width)
-				y = round(yDiff / self.cellSize.height)
-		else:
-			x = coords[0]
-			y = coords[1]
+		try:
+			###############################################
+			# Create cell in grid relative to origin cell #
+			###############################################
 			
-		# Create new cell
-		newCell = Cell(Coordinates(x, y), Position(posx * self.cellSize.width, posy * self.cellSize.height), self.cellSize)
+			# Get origin cell information
+			originCellPos = (self.cells[(0,0)].left + 1, self.cells[(0,0)].top + 1)
+			originCenter = self.cells[(0,0)].center
+			
+			# Find cell grid coordinates
+			if coords == None:
+					xDiff = pos[0] - originCenter[0]
+					yDiff = pos[1] - originCenter[1]
+					
+					x = round(xDiff / self.cellSize.width)
+					y = round(yDiff / self.cellSize.height)
+			else:
+				x = coords[0]
+				y = coords[1]
+			
+			# Create new cell relative to origin cell
+			newCell = Cell(Coordinates(x, y), Position((x * self.cellSize.width) + originCellPos[0], (y * self.cellSize.height) + originCellPos[1]), self.cellSize)
+		
+		except KeyError:
+			#############################################
+			# No cells exist yet, so create origin cell #
+			#############################################
+			x = 0
+			y = 0
+			
+			# Locate cell position on screen
+			posx = math.floor(pos[0]/self.cellSize.width)
+			posy = math.floor(pos[1]/self.cellSize.height)
+			
+			# Create first cell
+			newCell = Cell(Coordinates(x, y), Position(posx * self.cellSize.width, posy * self.cellSize.height), self.cellSize)
 		
 		# Add cell to list and dict
 		self.cells[(x, y)] = newCell
-		
+		self.addLines()
+		self.redrawAll = True
 		# Set new cell to redraw
 		self.cellsToRedraw.append(newCell)
 		
 		return newCell
-
+	
 	def createNeighbors(self, cell, createNewCells = True):
 		cell.neighbors = []
 		
@@ -444,20 +533,41 @@ class Cell(pygame.Rect):
 		self.added = False
 		self.tempAlive = False
 	
+	def resizeAndMove(self, pos, size):
+		super().__init__((pos.left - 1, pos.top - 1), (size.width + 2, size.height + 2))
+		self.drawableRect = pygame.Rect((pos.left + 1, pos.top + 1), (size.width - 1, size.height - 1))
+
 	def draw(self, surface):
 		if self.alive:
 			color = "black"
 		else:
 			color = "white"
 		
-		surface.fill(pygame.Color(color), self.drawableRect)
+		if self.drawableRect.left < 0:
+			if self.drawableRect.top < 0:
+				tempRect = pygame.Rect(0, 0, self.drawableRect.width + self.drawableRect.left, self.drawableRect.height + self.drawableRect.top)
+			else:
+				tempRect = pygame.Rect(0, self.drawableRect.top, self.drawableRect.width + self.drawableRect.left, self.drawableRect.height)
+		else:
+			if self.drawableRect.top < 0:
+				tempRect = pygame.Rect(self.drawableRect.left, 0, self.drawableRect.width, self.drawableRect.height + self.drawableRect.top)
+			else:
+				tempRect = self.drawableRect
+
+		surface.fill(pygame.Color(color), tempRect)
 		
-		return self.drawableRect
+		return tempRect
 	
 	def resize(self, newSize):
-		self.width = newSize.width
-		self.height = newSize.height
+		self.width = newSize.width + 2
+		self.height = newSize.height + 2
+		
+		self.drawableRect.width = newSize.width - 1
+		self.drawableRect.height = newSize.height - 1
 	
 	def move(self, newPos):
-		self.left = newPos.left
-		self.top = newPos.top
+		self.left = newPos.left - 1
+		self.top = newPos.top - 1
+
+		self.drawableRect.left = newPos.left + 1
+		self.drawableRect.top = newPos.top + 1

@@ -363,7 +363,7 @@ class Interface():
 			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	
 	def speedUp(self):
-		if(self.calcThread.speed < 21):
+		if(self.calcThread.speed < self.calcThread.speedLimit):
 			self.calcThread.speed += 1
 			self.controls.updateSpeedDisplay(self.calcThread.speed)
 	

@@ -12,6 +12,7 @@ class CalcThread(Thread):
 		self.daemon = True
 		self.interface = interface
 		self.speed = 2
+		self.speedLimit = 20
 		self.killswitch = False
 		
 	def run(self):

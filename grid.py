@@ -19,9 +19,9 @@ class Grid(pygame.Rect):
 		self.minSize = Dimensions(5,5)
 		self.maxSize = Dimensions(100, 100)
 		
-		# Create array of grid lines and populate
-		# with first horizontal and vertical lines
-		self.gridLines = [[((0, 0), (self.width, 0))], [((0, 0), (0, self.height))]]
+		# Create array of grid lines
+		self.gridLines = []
+		
 		
 		# Create grid lines
 		self.addLines()
@@ -76,10 +76,6 @@ class Grid(pygame.Rect):
 			updateList = [self]
 		
 		return updateList
-		
-	
-	def redrawAll(self):
-		self.redrawAll = True
 	
 	###########################################
 	# GRID SIZE MANIPULATION METHODS          #
@@ -94,17 +90,21 @@ class Grid(pygame.Rect):
 		#   The set of coordinates (2 per line)         #
 		#   0: x-coordinate; 1: y-coordinate            #
 		#################################################
-	
+		
+		# Populate gridLines array with the
+		# first horizontal and vertical lines
+		self.gridLines = [[((0, 0), (self.width, 0))], [((0, 0), (0, self.height))]]
+		
 		# Add horizontal
-		while self.gridLines[0][-1][0][1] < self.height:
+		while self.gridLines[0][-1][0][1] < self.height - 1:
 			nextTop = self.gridLines[0][-1][0][1] + self.cellSize.height
-			self.gridLines[0].append(((0, nextTop), (self.width, nextTop)))
+			self.gridLines[0].append(((0, nextTop), (self.width - 1, nextTop)))
 		
 		# Add vertical
-		while self.gridLines[1][-1][0][0] < self.width:
+		while self.gridLines[1][-1][0][0] < self.width - 1:
 			nextLeft = self.gridLines[1][-1][0][0] + self.cellSize.width
-			self.gridLines[1].append(((nextLeft, 0), (nextLeft, self.height)))
-		
+			self.gridLines[1].append(((nextLeft, 0), (nextLeft, self.height - 1)))
+	
 	def addColumn(self, prepend = False):
 		# Grid gets one wider
 		self.gridWidth = self.gridWidth + 1
@@ -213,20 +213,17 @@ class Grid(pygame.Rect):
 		self.gridHeight = self.gridHeight - 1
 	
 	def resize(self, size, location):
-		# Currently not working
-		return
-		
-		# Add and remove cells that have moved on or off screen
-		self.autoAddRemoveCells(size)
-		
 		# Reset constants
 		self.left=location.left
 		self.top=location.top
 		self.width=size.width
 		self.height=size.height
 		
+		# Add grid lines
+		self.addLines()
+		
 		# Schedule all cells for redrawAll
-		self.redrawAll()
+		self.redrawAll = True
 	
 	###########################################
 	# NEIGHBOR CREATION METHODS               #

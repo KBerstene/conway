@@ -139,29 +139,35 @@ class Interface():
 	def processMouseEvents(self):
 		# Get current time
 		currentTime = time()
-
+		
+		# Get mouse info
+		leftClick = pygame.mouse.get_pressed()[0] # Left click
+		middleClick = pygame.mouse.get_pressed()[1] # Middle click
+		rightClick = pygame.mouse.get_pressed()[2] # Right click
+		mousePos = pygame.mouse.get_pos()
+		
 		###########################################################
 		# Process mouse events that only happen once              #
 		###########################################################
 		
 		if not self.mouseHeld:
-			if pygame.mouse.get_pressed()[0]: # Left click
-				if self.controls.collidepoint(pygame.mouse.get_pos()):
+			if leftClick:
+				if self.controls.collidepoint(mousePos):
 					pass
-			if pygame.mouse.get_pressed()[1]: # Middle click
+			if middleClick:
 				pass
-			if pygame.mouse.get_pressed()[2]: # Right click
+			if rightClick:
 				pass
 		
 		###########################################################
 		# Process instantly repeated mouse events                 #
 		###########################################################
 		
-		if pygame.mouse.get_pressed()[0]: # Left click
-			if self.grid.collidepoint(pygame.mouse.get_pos()):
-				clickedCell = self.grid.getCell(pygame.mouse.get_pos())
+		if leftClick:
+			if self.grid.collidepoint(mousePos):
+				clickedCell = self.grid.getCell(mousePos)
 				if clickedCell == None:
-					clickedCell = self.grid.createCell(pygame.mouse.get_pos())
+					clickedCell = self.grid.createCell(mousePos)
 				
 				if not self.mouseHeld:
 					# Activate the cell to change its alive status
@@ -173,9 +179,9 @@ class Interface():
 					# clicking on it.
 					if clickedCell.alive != self.multiCellDragState:
 						self.grid.clickCell(clickedCell)
-		if pygame.mouse.get_pressed()[1]: # Middle click
+		if middleClick:
 			pass
-		if pygame.mouse.get_pressed()[2]: # Right click
+		if rightClick:
 			pass
 		
 		###########################################################
@@ -197,11 +203,11 @@ class Interface():
 		
 		# Process events for the first time and
 		# after the appropriate delay interval
-		if pygame.mouse.get_pressed()[0]: # Left click
+		if leftClick:
 			pass
-		if pygame.mouse.get_pressed()[1]: # Middle click
+		if middleClick:
 			pass
-		if pygame.mouse.get_pressed()[2]: # Right click
+		if rightClick:
 			pass
 		
 		###########################################################

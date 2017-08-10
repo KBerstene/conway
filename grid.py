@@ -54,7 +54,7 @@ class Grid(pygame.Rect):
 			# Tell grid to redraw
 			self.redrawGrid = True
 			# Tell cells to redraw
-			pass
+			self.cellsToRedraw = list(self.cells.values())
 		
 		# Check to redraw grid lines
 		if self.redrawGrid:
@@ -229,22 +229,26 @@ class Grid(pygame.Rect):
 	# NEIGHBOR CREATION METHODS               #
 	###########################################
 	
-	def createCell(self, pos):
+	def createCell(self, pos, coords = None):
 		# Locate cell position on screen
 		posx = math.floor(pos[0]/self.cellSize.width)
 		posy = math.floor(pos[1]/self.cellSize.height)
 		
 		# Find cell grid coordinates
-		if len(self.cells) == 0:
-			x = 0
-			y = 0
+		if coords == None:
+			if len(self.cells) == 0:
+				x = 0
+				y = 0
+			else:
+				origin = self.cells[(0,0)].center
+				xDiff = pos[0] - origin[0]
+				yDiff = pos[1] - origin[1]
+				
+				x = round(xDiff / self.cellSize.width)
+				y = round(yDiff / self.cellSize.height)
 		else:
-			origin = self.cells[(0,0)].center
-			xDiff = pos[0] - origin[0]
-			yDiff = pos[1] - origin[1]
-			
-			x = round(xDiff / self.cellSize.width)
-			y = round(yDiff / self.cellSize.height)
+			x = coords[0]
+			y = coords[1]
 			
 		# Create new cell
 		newCell = Cell(Coordinates(x, y), Position(posx * self.cellSize.width, posy * self.cellSize.height), self.cellSize)
@@ -267,7 +271,7 @@ class Grid(pygame.Rect):
 					cell.neighbors.append(self.cells[relativeCoords])
 				else:
 					if createNewCells:
-						self.createCell(pos = (cell.centerx + (self.cellSize.width * i), cell.centery + (self.cellSize.height * j)))
+						self.createCell(pos = (cell.centerx + (self.cellSize.width * i), cell.centery + (self.cellSize.height * j)), coords = relativeCoords)
 						cell.neighbors.append(self.cells[relativeCoords])
 		
 		# Once neighbors are created, check each of them
